@@ -206,10 +206,4 @@ public class BMotion implements IToolListener {
         return sessionConfiguration.scriptPath.split(",")
     }
 
-    private class Trigger {
-
-        public final List<BMotionObserver> observers = []
-
-    }
-
 }
