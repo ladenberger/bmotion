@@ -1,0 +1,90 @@
+
+/*function loadScript(url, callback){
+
+    var script = document.createElement("script")
+    script.type = "text/javascript";
+
+    if (script.readyState){  //IE
+        script.onreadystatechange = function(){
+            if (script.readyState == "loaded" ||
+                    script.readyState == "complete"){
+                script.onreadystatechange = null;
+                callback();
+            }
+        };
+    } else {  //Others
+        script.onload = function(){
+            callback();
+        };
+    }
+
+    script.src = url;
+    document.getElementsByTagName("head")[0].appendChild(script);
+}
+
+function loadCss(url, callback){
+
+    var style = document.createElement("link")
+    style.rel = "stylesheet";
+    style.type = "text/css";
+
+    if (style.readyState){  //IE
+        style.onreadystatechange = function(){
+            if (style.readyState == "loaded" ||
+                    style.readyState == "complete"){
+                style.onreadystatechange = null;
+                callback();
+            }
+        };
+    } else {  //Others
+        style.onload = function(){
+            callback();
+        };
+    }
+
+    style.href = url;
+    document.getElementsByTagName("head")[0].appendChild(style);
+}
+
+function bmotionLoadScripts(list) {
+    loadScript("libs/jquery/jquery-1.11.0.min.js", function(){
+        loadScript("libs/bootstrap/js/bootstrap.min.js", function(){
+                loadScript("libs/socket.io/socket.io.js", function(){
+                       loadScript("libs/bmotion/bmotion.js", function(){
+                            for (i = 0; i < list.length; i++) {
+                                loadScript(list[i], function(){})
+                            }
+                       });
+                });
+        });
+
+    });
+}
+
+loadCss("libs/bootstrap/css/bootstrap.min.css", function() {
+})
+loadCss("libs/bmotion/bmotion.css", function() {
+})*/
+
+
+
+function loadCss(url, callback){
+    var link = document.createElement("link");
+    link.type = "text/css";
+    link.rel = "stylesheet";
+    if (link.readyState){  //IE
+        link.onreadystatechange = function(){
+            if (link.readyState == "loaded" ||
+                    link.readyState == "complete"){
+                link.onreadystatechange = null;
+                callback();
+            }
+        };
+    } else {  //Others
+        link.onload = function(){
+            callback();
+        };
+    }
+    link.href = url;
+    document.getElementsByTagName("head")[0].appendChild(link);
+}
