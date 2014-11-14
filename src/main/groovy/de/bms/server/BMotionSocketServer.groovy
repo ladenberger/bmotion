@@ -65,6 +65,19 @@ public class BMotionSocketServer {
                     }
                 });
 
+        server.addEventListener("reloadModel", String.class,
+                new DataListener<String>() {
+                    @Override
+                    public void onData(final SocketIOClient client, String data,
+                                       final AckRequest ackRequest) {
+                        String path = clients.get(client)
+                        def BMotion bmotion = sessions.get(path) ?: null
+                        if (bmotion != null) {
+                            bmotion.loadModel()
+                        }
+                    }
+                });
+
         server.addEventListener("initSession", SessionConfiguration.class, new DataListener<SessionConfiguration>() {
             @Override
             public void onData(final SocketIOClient client, SessionConfiguration sessionConfiguration,
@@ -79,13 +92,14 @@ public class BMotionSocketServer {
                             iToolProvider)
                     sessions.put(url.getPath(), bmotion)
                     BMotionSocketServer.log.info "Created new BMotion session " + bmotion.sessionId
+                } else {
+                    bmotion.refreshSession()
                 }
                 // Add client to session
                 bmotion.clients.add(client)
                 // Bound client to current visualisation
                 clients.put(client, url.getPath())
                 BMotionSocketServer.log.info "Refresh BMotion session " + bmotion.sessionId
-                bmotion.refreshSession()
 
             }
         });

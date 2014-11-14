@@ -51,6 +51,36 @@ define(["css!jquery-ui-css","css!jquery-ui-theme-css","css!bootstrap-css","css!b
         '</div>'+
         '</div>')
 
+    $("body").append('<nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">'+
+    '        <div class="container-fluid">'+
+    '            <div class="navbar-header">'+
+    '                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">'+
+    '                    <span class="sr-only">Toggle navigation</span>'+
+    '                    <span class="icon-bar"></span>'+
+    '                    <span class="icon-bar"></span>'+
+    '                    <span class="icon-bar"></span>'+
+    '                </button>'+
+    '                <a class="navbar-brand" href="#" id="bmotion-label">BMotion Studio</a>'+
+    '            </div>'+
+    '            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">'+
+    '                <ul class="nav navbar-nav navbar-right" id="bmotion-navigation">'+
+    '                    <li class="dropdown">'+
+    '                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Model <span class="caret"></span></a>'+
+    '                        <ul class="dropdown-menu" role="menu">'+
+    '                            <li><a id="bt_reloadModel" href="#">Reload</a></li>'+
+    '                        </ul>'+
+    '                    </li>'+
+    '                </ul>'+
+    '            </div>'+
+    '        </div>'+
+    '    </nav>')
+
+    $("#bt_reloadModel").click(function() {
+        socket.emit('reloadModel', function() {
+            console.log("reload call back")
+        });
+    });
+
     $('#loadingModal').modal('show')
 
     // ---------------------
@@ -65,9 +95,11 @@ define(["css!jquery-ui-css","css!jquery-ui-theme-css","css!bootstrap-css","css!b
             tool: $("meta[name='bms.tool']").attr("content")
         };
         socket.emit('initSession', event, function() {
+
             // Callback after initialising BMotion session
             // Loading visualisation finished
             $('#loadingModal').modal('hide')
+
         });
     });
 
