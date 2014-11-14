@@ -81,7 +81,7 @@ public interface ITool {
 	 */
 	public String getName();
 
-    public void initModel(String modelPath);
+    public void loadModel(String modelPath);
 
     public void refresh();
 
