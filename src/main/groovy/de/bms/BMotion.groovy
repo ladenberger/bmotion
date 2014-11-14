@@ -10,6 +10,7 @@ import de.bms.observer.BMotionObserver
 import de.bms.observer.BMotionTransformer
 import de.bms.observer.TransformersObserver
 import de.bms.server.BMotionScriptEngineProvider
+import de.bms.server.DefaultScriptEngineProvider
 import de.bms.server.SessionConfiguration
 import groovy.util.logging.Slf4j
 
@@ -136,7 +137,13 @@ public class BMotion implements IToolListener {
     private void initSession() {
         log.debug "Initialising BMotion Session"
         // Initialise model
-        initModel(getTemplateFolder())
+        loadModel()
+        refreshSession()
+        initialised = true;
+        log.debug "BMotion Session initialised"
+    }
+
+    public void refreshSession() {
         this.observers.clear()
         this.methods.clear()
         this.transformerObserver = new TransformersObserver()
@@ -145,18 +152,13 @@ public class BMotion implements IToolListener {
         this.observers.put(TRIGGER_ANIMATION_CHANGED, trigger)
         // Initialise groovy scripting engine
         initGroovyScriptEngine(getTemplateFolder())
-        initialised = true;
-        log.debug "BMotion Session initialised"
-    }
-
-    public void refreshSession() {
         tool.refresh()
     }
 
-    private void initModel(String templateFolder) {
+    public void loadModel() {
         def path = sessionConfiguration.modelPath
         if (path != null) {
-            tool.initModel(templateFolder + File.separator + path)
+            tool.loadModel(getTemplateFolder() + File.separator + path)
         }
     }
 
@@ -164,7 +166,8 @@ public class BMotion implements IToolListener {
         String[] scriptPaths = getScriptPaths()
         try {
             log.info "Initialising Groovy Scripting Engine"
-            def shell = scriptEngineProvider.get()
+            scriptEngineProvider = scriptEngineProvider ?: new DefaultScriptEngineProvider()
+            def GroovyShell shell = scriptEngineProvider.get()
             shell.setVariable("bms", this);
             shell.setVariable("templateFolder", templateFolder);
             URL url = Resources.getResource("mainscript");
