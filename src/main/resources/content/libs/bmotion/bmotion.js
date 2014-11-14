@@ -67,7 +67,7 @@ define(["css!jquery-ui-css","css!jquery-ui-theme-css","css!bootstrap-css","css!b
     '                    <li class="dropdown">'+
     '                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Model <span class="caret"></span></a>'+
     '                        <ul class="dropdown-menu" role="menu">'+
-    '                            <li><a id="bt_reloadModel" href="#">Reload</a></li>'+
+    '                            <li><a id="bt_reloadModel" href="#"><i class="glyphicon glyphicon-refresh"></i> Reload</a></li>'+
     '                        </ul>'+
     '                    </li>'+
     '                </ul>'+
