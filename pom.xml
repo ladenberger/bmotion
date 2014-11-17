@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.bmotion</groupId>
@@ -19,10 +17,12 @@
     <distributionManagement>
         <repository>
             <id>cobra.cs.uni-duesseldorf.de</id>
+            <name>cobra.cs.uni-duesseldorf.de-releases</name>
             <url>http://cobra.cs.uni-duesseldorf.de/artifactory/libs-release-local</url>
         </repository>
         <snapshotRepository>
             <id>cobra.cs.uni-duesseldorf.de</id>
+            <name>cobra.cs.uni-duesseldorf.de-snapshots</name>
             <url>http://cobra.cs.uni-duesseldorf.de/artifactory/libs-snapshot-local</url>
         </snapshotRepository>
     </distributionManagement>
