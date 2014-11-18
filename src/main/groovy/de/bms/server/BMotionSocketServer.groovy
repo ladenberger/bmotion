@@ -39,6 +39,7 @@ public class BMotionSocketServer {
             public void onDisconnect(SocketIOClient client) {
 
                 String path = clients.get(client)
+                clients.remove(client)
                 def BMotion bmotion = sessions.get(path) ?: null
                 if (bmotion != null) {
                     bmotion.clients.remove(client)

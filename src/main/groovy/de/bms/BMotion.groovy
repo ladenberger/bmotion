@@ -152,7 +152,6 @@ public class BMotion implements IToolListener {
         this.observers.put(TRIGGER_ANIMATION_CHANGED, trigger)
         // Initialise groovy scripting engine
         initGroovyScriptEngine(getTemplateFolder())
-        tool.refresh()
     }
 
     public void loadModel() {

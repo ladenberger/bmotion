@@ -83,6 +83,4 @@ public interface ITool {
 
     public void loadModel(String modelPath);
 
-    public void refresh();
-
 }
