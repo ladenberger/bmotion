@@ -69,12 +69,12 @@ public class BMotionSocketServer {
         server.addEventListener("reloadModel", String.class,
                 new DataListener<String>() {
                     @Override
-                    public void onData(final SocketIOClient client, String data,
+                    public void onData(final SocketIOClient client, String s,
                                        final AckRequest ackRequest) {
                         String path = clients.get(client)
                         def BMotion bmotion = sessions.get(path) ?: null
                         if (bmotion != null) {
-                            bmotion.initModel()
+                            bmotion.reloadModel()
                         }
                     }
                 });

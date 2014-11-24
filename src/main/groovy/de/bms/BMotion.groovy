@@ -133,9 +133,9 @@ public class BMotion implements IToolListener {
 
     public void initSession(SessionConfiguration sessionConfiguration) {
         log.debug "Initialising BMotion Session"
-        initModel(sessionConfiguration)
+        initModel(sessionConfiguration?.modelPath)
         initObservers()
-        initGroovyScriptEngine(sessionConfiguration)
+        initGroovyScript(sessionConfiguration?.scriptPath)
         this.sessionConfiguration = sessionConfiguration
         tool.refresh()
         initialised = true;
@@ -151,40 +151,51 @@ public class BMotion implements IToolListener {
         this.observers.put(TRIGGER_ANIMATION_CHANGED, trigger)
     }
 
-    private void initModel(SessionConfiguration sessionConfiguration) {
+    private void initModel(String modelPath, boolean force = false) {
         def String oldModelPath = this.sessionConfiguration?.modelPath
-        def String newModelPath = sessionConfiguration.modelPath
-        if (!newModelPath.equals(oldModelPath)) {
-            tool.loadModel(getTemplateFolder() + File.separator + newModelPath)
+        if (modelPath != null && (!modelPath.equals(oldModelPath) || force)) {
+            log.info "Loading model " + modelPath
+            tool.loadModel(getTemplateFolder() + File.separator + modelPath)
+            log.info "Model loaded"
         }
     }
 
-    private void initGroovyScriptEngine(SessionConfiguration sessionConfiguration) {
-        String[] scriptPaths = sessionConfiguration.scriptPath.split(",")
-        String templateFolder = getTemplateFolder()
-        try {
-            log.info "Initialising Groovy Scripting Engine"
-            scriptEngineProvider = scriptEngineProvider ?: new DefaultScriptEngineProvider()
-            def GroovyShell shell = scriptEngineProvider.get()
-            shell.setVariable("bms", this);
-            shell.setVariable("templateFolder", templateFolder);
-            URL url = Resources.getResource("mainscript");
-            String bmsscript = Resources.toString(url, Charsets.UTF_8);
-            shell.evaluate(BMotionGroovy.imports + "\n" + bmsscript)
-            def aimports = BMotionGroovy.IMPORTS
-            aimports += scriptEngineProvider.getImports()
-            if (scriptPaths != null) {
-                for (String path : scriptPaths) {
-                    String filePath = templateFolder + File.separator + path
-                    shell.evaluate(aimports.join("\n") + "\n" + new File(filePath).getText(), path)
+    private void initGroovyScript(String scriptPath) {
+        if (scriptPath) {
+            String[] scriptPaths = scriptPath.split(",")
+            String templateFolder = getTemplateFolder()
+            try {
+                log.info "Initialising Groovy Scripting Engine"
+                scriptEngineProvider = scriptEngineProvider ?: new DefaultScriptEngineProvider()
+                def GroovyShell shell = scriptEngineProvider.get()
+                shell.setVariable("bms", this);
+                shell.setVariable("templateFolder", templateFolder);
+                URL url = Resources.getResource("mainscript");
+                String bmsscript = Resources.toString(url, Charsets.UTF_8);
+                shell.evaluate(BMotionGroovy.imports + "\n" + bmsscript)
+                def aimports = BMotionGroovy.IMPORTS
+                aimports += scriptEngineProvider.getImports()
+                if (scriptPaths != null) {
+                    for (String path : scriptPaths) {
+                        String filePath = templateFolder + File.separator + path
+                        shell.evaluate(aimports.join("\n") + "\n" + new File(filePath).getText(), path)
+                    }
                 }
+                log.info "Groovy Scripting Engine Initialised"
+            } catch (GroovyRuntimeException e) {
+                e.printStackTrace()
+            } catch (Exception e) {
+                BMotionScriptException.checkForScriptErrors(e, scriptPaths)
             }
-            log.info "Groovy Scripting Engine Initialised"
-        } catch (GroovyRuntimeException e) {
-            e.printStackTrace()
-        } catch (Exception e) {
-            BMotionScriptException.checkForScriptErrors(e, scriptPaths)
         }
+    }
+
+    public void reloadModel() {
+        initModel(sessionConfiguration?.modelPath, true)
+    }
+
+    public void reloadGrooyScript() {
+        initGroovyScript(sessionConfiguration?.scriptPath)
     }
 
     public String getTemplateFolder() {

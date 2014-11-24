@@ -73,7 +73,7 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
     '                    </li>' +
     '                    <li class="dropdown">' +
     '                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Model <span class="caret"></span></a>' +
-    '                        <ul class="dropdown-menu" role="menu">' +
+    '                        <ul class="dropdown-menu" role="menu" id="bmotion-navigation-model">' +
     '                            <li><a id="bt_reloadModel" href="#"><i class="glyphicon glyphicon-refresh"></i> Reload</a></li>' +
     '                        </ul>' +
     '                    </li>' +
@@ -123,7 +123,6 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
 
     $("#bt_reloadModel").click(function () {
         socket.emit('reloadModel', function () {
-            console.log("reload call back")
         });
     });
 
