@@ -41,17 +41,14 @@ public class BMotion implements IToolListener {
 
     def BMotionScriptEngineProvider scriptEngineProvider
 
-    public BMotion(final UUID sessionId, final ITool tool, final ToolRegistry toolRegistry,
-                   final SessionConfiguration sessionConfiguration, final String templatePath,
+    public BMotion(final UUID sessionId, final ITool tool, final ToolRegistry toolRegistry, final String templatePath,
                    final BMotionScriptEngineProvider scriptEngineProvider) {
         this.sessionId = sessionId
         this.tool = tool
-        this.sessionConfiguration = sessionConfiguration
         this.templatePath = templatePath
         this.toolRegistry = toolRegistry
         this.scriptEngineProvider = scriptEngineProvider
         this.toolRegistry.registerListener(this)
-        initSession()
     }
 
     @Override
@@ -134,35 +131,37 @@ public class BMotion implements IToolListener {
 
     // ------------------
 
-    private void initSession() {
+    public void initSession(SessionConfiguration sessionConfiguration) {
         log.debug "Initialising BMotion Session"
-        // Initialise model
-        loadModel()
-        refreshSession()
+        initModel(sessionConfiguration)
+        initObservers()
+        initGroovyScriptEngine(sessionConfiguration)
+        this.sessionConfiguration = sessionConfiguration
+        tool.refresh()
         initialised = true;
         log.debug "BMotion Session initialised"
     }
 
-    public void refreshSession() {
+    private void initObservers() {
         this.observers.clear()
         this.methods.clear()
         this.transformerObserver = new TransformersObserver()
         def Trigger trigger = new Trigger()
         trigger.observers.add(this.transformerObserver)
         this.observers.put(TRIGGER_ANIMATION_CHANGED, trigger)
-        // Initialise groovy scripting engine
-        initGroovyScriptEngine(getTemplateFolder())
     }
 
-    public void loadModel() {
-        def path = sessionConfiguration.modelPath
-        if (path != null) {
-            tool.loadModel(getTemplateFolder() + File.separator + path)
+    private void initModel(SessionConfiguration sessionConfiguration) {
+        def String oldModelPath = this.sessionConfiguration?.modelPath
+        def String newModelPath = sessionConfiguration.modelPath
+        if (!newModelPath.equals(oldModelPath)) {
+            tool.loadModel(getTemplateFolder() + File.separator + newModelPath)
         }
     }
 
-    public void initGroovyScriptEngine(String templateFolder) {
-        String[] scriptPaths = getScriptPaths()
+    private void initGroovyScriptEngine(SessionConfiguration sessionConfiguration) {
+        String[] scriptPaths = sessionConfiguration.scriptPath.split(",")
+        String templateFolder = getTemplateFolder()
         try {
             log.info "Initialising Groovy Scripting Engine"
             scriptEngineProvider = scriptEngineProvider ?: new DefaultScriptEngineProvider()
@@ -205,7 +204,7 @@ public class BMotion implements IToolListener {
     }
 
     public String[] getScriptPaths() {
-        return sessionConfiguration.scriptPath.split(",")
+        return sessionConfiguration?.scriptPath?.split(",")
     }
 
 }

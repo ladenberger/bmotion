@@ -74,7 +74,39 @@ public class BMotionSocketServer {
                         String path = clients.get(client)
                         def BMotion bmotion = sessions.get(path) ?: null
                         if (bmotion != null) {
-                            bmotion.loadModel()
+                            bmotion.initModel()
+                        }
+                    }
+                });
+
+        server.addEventListener("initSvgEditor", String.class,
+                new DataListener<String>() {
+                    @Override
+                    public void onData(final SocketIOClient client, String svgFile,
+                                       final AckRequest ackRequest) {
+                        String path = clients.get(client)
+                        def BMotion bmotion = sessions.get(path) ?: null
+                        if (bmotion != null) {
+                            def svg = bmotion.sessionConfiguration.bmsSvg
+                            if (svg && ackRequest.isAckRequested()) {
+                                ackRequest.sendAckData(svg.get(svgFile));
+                            }
+                        }
+                    }
+                });
+
+        server.addEventListener("saveSvg", SvgEditorContent.class,
+                new DataListener<SvgEditorContent>() {
+                    @Override
+                    public void onData(final SocketIOClient client, SvgEditorContent svg,
+                                       final AckRequest ackRequest) {
+                        String path = clients.get(client)
+                        def BMotion bmotion = sessions.get(path) ?: null
+                        if (bmotion != null) {
+                            File svgFile = new File(bmotion.getTemplateFolder() + File.separator + svg.name)
+                            svgFile.write(svg.content)
+                            bmotion.sessionConfiguration.bmsSvg.put(svg.name, svg.content)
+                            bmotion.getTool().refresh()
                         }
                     }
                 });
@@ -87,20 +119,32 @@ public class BMotionSocketServer {
                 URL url = new URL(sessionConfiguration.templateUrl)
                 File templateFile = new File(workspacePath + File.separator + url.getPath().replace("/bms/", ""))
                 BMotionSocketServer.log.debug "Template: " + templateFile
+
+                sessionConfiguration.bmsSvg.keySet().each {
+                    File svgFile = new File(templateFile.getParent() + File.separator + it)
+                    sessionConfiguration.bmsSvg[it] = (svgFile.exists() ? svgFile.text : '<svg width="325" height="430" xmlns="http://www.w3.org/2000/svg"></svg>')
+                }
+
                 def BMotion bmotion = sessions.get(url.getPath()) ?: null
                 if (bmotion == null) {
-                    bmotion = createSession(toolRegistry, sessionConfiguration, templateFile, scriptEngineProvider,
+                    bmotion = createSession(toolRegistry, sessionConfiguration.tool, templateFile, scriptEngineProvider,
                             iToolProvider)
                     sessions.put(url.getPath(), bmotion)
                     BMotionSocketServer.log.info "Created new BMotion session " + bmotion.sessionId
-                } else {
-                    bmotion.refreshSession()
                 }
+                // Initialise session
+                bmotion.initSession(sessionConfiguration)
+
                 // Add client to session
                 bmotion.clients.add(client)
                 // Bound client to current visualisation
                 clients.put(client, url.getPath())
                 BMotionSocketServer.log.info "Refresh BMotion session " + bmotion.sessionId
+
+                // Send content of linked SVG files to client
+                if (ackRequest.isAckRequested()) {
+                    ackRequest.sendAckData(bmotion.sessionConfiguration.bmsSvg)
+                }
 
             }
         });
@@ -129,14 +173,14 @@ public class BMotionSocketServer {
     }
 
     //TODO: Make initialisation of ITool implementations generic
-    private BMotion createSession(ToolRegistry toolRegistry, SessionConfiguration sessionConfiguration,
+    private BMotion createSession(ToolRegistry toolRegistry, String toolId,
                                   File templateFile, BMotionScriptEngineProvider scriptEngineProvider,
                                   BMotionIToolProvider iToolProvider) {
         //BMotionSocketServer.log.info "Going to create new session for " + sessionId
         UUID sessionId = UUID.randomUUID()
-        if (sessionConfiguration.tool != null) {
-            def ITool tool = iToolProvider.get(sessionConfiguration.tool, toolRegistry)
-            return new BMotion(sessionId, tool, toolRegistry, sessionConfiguration, templateFile.getPath(),
+        if (toolId != null) {
+            def ITool tool = iToolProvider.get(toolId, toolRegistry)
+            return new BMotion(sessionId, tool, toolRegistry, templateFile.getPath(),
                     scriptEngineProvider)
         } else {
             log.error "BMotion Studio: Please enter a tool (e.g. BAnimation or CSPAnimation)"

@@ -2,19 +2,21 @@ package de.bms.server
 
 public class SessionConfiguration {
 
-    def String templateUrl
-    def String scriptPath
-    def String modelPath
-    def String tool
+    def templateUrl
+    def scriptPath
+    def modelPath
+    def tool
+    def bmsSvg
 
     public SessionConfiguration() {}
 
-    public SessionConfiguration(String templateUrl, String scriptPath, String modelPath, String tool) {
+    public SessionConfiguration(templateUrl, scriptPath, modelPath, tool, bmsSvg) {
         super();
         this.templateUrl = templateUrl
         this.scriptPath = scriptPath
         this.modelPath = modelPath
         this.tool = tool
+        this.bmsSvg = bmsSvg
     }
 
 }
