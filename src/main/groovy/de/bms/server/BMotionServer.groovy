@@ -141,4 +141,12 @@ public class BMotionServer {
         socketServer.start(socketHost, socketPort, standalone, workspacePath, scriptEngineProvider, itoolProvider)
     }
 
+    public int getPort() {
+        return port
+    }
+
+    public String getHost() {
+        return host
+    }
+
 }
