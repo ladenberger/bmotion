@@ -23,6 +23,8 @@ public class BMotionServer {
 
     def BMotionSocketServer socketServer
 
+    def boolean standalone = false
+
     def int port = 8080
     def int socketPort = 9090
 
@@ -34,7 +36,10 @@ public class BMotionServer {
     }
 
     public BMotionServer(String[] args) {
+        parseCommandLine(args)
+    }
 
+    private void parseCommandLine(args) {
         Options options = new Options()
         options.addOption(OptionBuilder.withArgName("workspace").hasArg()
                 .withDescription("Workspace").create("workspace"))
@@ -46,6 +51,7 @@ public class BMotionServer {
                 .withDescription("Socket Host").create("socketHost"))
         options.addOption(OptionBuilder.withArgName("socketPort").hasArg()
                 .withDescription("Socket Port").create("socketPort"))
+        options.addOption(new Option("standalone", "Run in standalone mode"));
 
         CommandLineParser parser = new BasicParser()
         CommandLine line = parser.parse(options, args);
@@ -65,7 +71,9 @@ public class BMotionServer {
         if (line.hasOption("socketPort")) {
             this.socketPort = Integer.parseInt(line.getOptionValue("socketPort"))
         }
-
+        if (line.hasOption("standalone")) {
+            this.standalone = true
+        }
     }
 
     public void setWorkspacePath(String workspacePath) {
@@ -130,7 +138,7 @@ public class BMotionServer {
 
     private void startBMotionSocketServer() {
         socketServer = new BMotionSocketServer()
-        socketServer.start(socketHost, socketPort, workspacePath, scriptEngineProvider, itoolProvider)
+        socketServer.start(socketHost, socketPort, standalone, workspacePath, scriptEngineProvider, itoolProvider)
     }
 
 }

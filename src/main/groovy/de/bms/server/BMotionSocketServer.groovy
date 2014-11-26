@@ -19,7 +19,8 @@ public class BMotionSocketServer {
     public final Map<SocketIOClient, String> clients = new HashMap<SocketIOClient, String>();
     def SocketIOServer server
 
-    public void start(String host, int port, String workspacePath, BMotionScriptEngineProvider scriptEngineProvider,
+    public void start(String host, int port, boolean standalone, String workspacePath,
+                      BMotionScriptEngineProvider scriptEngineProvider,
                       BMotionIToolProvider iToolProvider) {
 
         Configuration config = new Configuration();
@@ -122,7 +123,8 @@ public class BMotionSocketServer {
 
                 sessionConfiguration.bmsSvg.keySet().each {
                     File svgFile = new File(templateFile.getParent() + File.separator + it)
-                    sessionConfiguration.bmsSvg[it] = (svgFile.exists() ? svgFile.text : '<svg width="325" height="430" xmlns="http://www.w3.org/2000/svg"></svg>')
+                    sessionConfiguration.bmsSvg[it] = (svgFile.exists() ? svgFile.text :
+                            '<svg width="325" height="430" xmlns="http://www.w3.org/2000/svg"></svg>')
                 }
 
                 def BMotion bmotion = sessions.get(url.getPath()) ?: null
@@ -143,7 +145,8 @@ public class BMotionSocketServer {
 
                 // Send content of linked SVG files to client
                 if (ackRequest.isAckRequested()) {
-                    ackRequest.sendAckData(bmotion.sessionConfiguration.bmsSvg)
+                    def data = [bmsSvg: bmotion.sessionConfiguration.bmsSvg, standalone: standalone]
+                    ackRequest.sendAckData(data)
                 }
 
             }
