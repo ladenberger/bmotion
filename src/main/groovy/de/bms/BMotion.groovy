@@ -154,7 +154,7 @@ public class BMotion implements IToolListener {
 
     private void initModel(String modelPath, boolean force = false) {
         log.info "Loading model " + modelPath
-        tool.loadModel(getTemplateFolder() + File.separator + modelPath, force)
+        tool.loadModel(modelPath != null ? getTemplateFolder() + File.separator + modelPath : null, force)
         log.info "Model loaded"
     }
 
