@@ -8,6 +8,7 @@ import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.ContextHandler
 import org.eclipse.jetty.server.handler.ResourceHandler
 import org.eclipse.jetty.server.nio.SelectChannelConnector
+import org.eclipse.jetty.util.resource.Resource
 import org.eclipse.jetty.util.resource.ResourceCollection
 
 @Slf4j
@@ -19,7 +20,7 @@ public class BMotionServer {
 
     private BMotionIToolProvider itoolProvider
 
-    private String[] resourcePaths
+    private URL[] resourcePaths
 
     def BMotionSocketServer socketServer
 
@@ -90,7 +91,7 @@ public class BMotionServer {
         this.itoolProvider = itoolProvider
     }
 
-    public void setResourcePaths(String[] resourcePaths) {
+    public void setResourcePaths(URL[] resourcePaths) {
         this.resourcePaths = resourcePaths
     }
 
@@ -128,9 +129,10 @@ public class BMotionServer {
         ContextHandler context = new ContextHandler();
         context.setContextPath("/bms");
         ResourceHandler resHandler = new ResourceHandler()
-        String[] s = [resourceResolver.resolve(Resources.getResource("content")), workspacePath]
+        Resource[] s = [Resource.newResource(resourceResolver.resolve(Resources.getResource("content"))), Resource.
+                newResource(workspacePath)]
         resourcePaths.each {
-            s << resourceResolver.resolve(it)
+            s += Resource.newResource(resourceResolver.resolve(it))
         }
         ResourceCollection resources = new ResourceCollection(s);
         resHandler.setBaseResource(resources)
