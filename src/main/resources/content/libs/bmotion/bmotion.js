@@ -79,7 +79,10 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
 
             if (standalone) {
                 $("body").append('<div title="SVG Editor" id="dialog_svgEditor"><iframe src="/bms/libs/bmseditor/index.html" frameBorder="0" id="iframe_svgEditor"></iframe></div>')
-
+                // Register socket in SVG editor
+                $('iframe#iframe_svgEditor').load(function () {
+                    document.getElementById('iframe_svgEditor').contentWindow.methodDraw.socket = socket
+                });
                 $("body").append('<nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">' +
                 '        <div class="container-fluid">' +
                 '            <div class="navbar-header">' +
@@ -163,6 +166,7 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
                 if (standalone)
                     $("#bmotion-navigation-svg").append('<li><a href="#" data-svg="' + i + '"><i class="glyphicon glyphicon-pencil"></i> ' + i + '</a></li>')
             });
+            socket.emit('initSvg');
 
             if (standalone) {
                 // Open SVG Editor
@@ -199,10 +203,6 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
         }
     });
 
-    // Register socket in SVG editor
-    $('iframe#iframe_svgEditor').load(function () {
-        document.getElementById('iframe_svgEditor').contentWindow.methodDraw.socket = socket
-    });
     // ---------------------
 
     // ---------------------

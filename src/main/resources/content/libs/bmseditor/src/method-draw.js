@@ -2402,8 +2402,7 @@
 				var replaceSvg = $(svg.content, window.parent.document)
 				replaceSvg.attr("data-svg", svg.name)
 				$("svg[data-svg='" + svg.name + "']", window.parent.document).replaceWith(replaceSvg)
-				methodDraw.socket.emit('saveSvg', svg, function () {
-				});
+				methodDraw.socket.emit('saveSvg', svg)
 			};
 					
 			var clickBold = function(){

@@ -96,11 +96,21 @@ public class BMotionSocketServer {
                     }
                 });
 
+        server.addEventListener("initSvg", String.class,
+                new DataListener<String>() {
+                    @Override
+                    public void onData(final SocketIOClient client, String d,
+                                       final AckRequest ackRequest) {
+                        client.sendEvent("initSvg")
+                    }
+                });
+
         server.addEventListener("saveSvg", SvgEditorContent.class,
                 new DataListener<SvgEditorContent>() {
                     @Override
                     public void onData(final SocketIOClient client, SvgEditorContent svg,
                                        final AckRequest ackRequest) {
+                        client.sendEvent("initSvg")
                         String path = clients.get(client)
                         def BMotion bmotion = sessions.get(path) ?: null
                         if (bmotion != null) {
