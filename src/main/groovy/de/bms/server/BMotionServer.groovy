@@ -25,6 +25,8 @@ public class BMotionServer {
 
     def boolean standalone = false
 
+    def ResourceResolver resourceResolver = new DefaultResourceResolver()
+
     def int port = 8080
     def int socketPort = 9090
 
@@ -126,8 +128,10 @@ public class BMotionServer {
         ContextHandler context = new ContextHandler();
         context.setContextPath("/bms");
         ResourceHandler resHandler = new ResourceHandler()
-        String[] s = [Resources.getResource("content"), workspacePath]
-        s += resourcePaths
+        String[] s = [resourceResolver.resolve(Resources.getResource("content")), workspacePath]
+        resourcePaths.each {
+            s << resourceResolver.resolve(it)
+        }
         ResourceCollection resources = new ResourceCollection(s);
         resHandler.setBaseResource(resources)
         resHandler.setCacheControl("no-cache")
