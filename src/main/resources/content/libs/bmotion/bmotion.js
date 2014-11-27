@@ -42,6 +42,23 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
     var socket = io.connect('http://localhost:9090');
     socket.on('connect', function () {
 
+        $("body").append('<div class="modal" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true">' +
+        '<div class="modal-dialog modal-vertical-centered">' +
+        '    <div class="modal-content">' +
+        '        <div class="modal-header">' +
+        '            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>' +
+        '            <h4 class="modal-title" id="myModalLabel">Loading visualisation ...</h4>' +
+        '        </div>' +
+        '        <div class="modal-body" style="text-align:center">' +
+        '            <p><img src="/bms/libs/bmotion/bmotion.png" /></p>' +
+        '            <p><img src="/bms/libs/bmotion/spinner3-bluey.gif" /></p>' +
+        '        </div>' +
+        '    </div>' +
+        '</div>' +
+        '</div>')
+
+        $('#loadingModal').modal('show')
+
         var bmsSvg = {};
         $("object[data-bms=svg]").map(function () {
             bmsSvg[$(this).attr('data')] = ""
@@ -59,23 +76,6 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
             var standalone = data.standalone
 
             // Callback after initialising BMotion session
-
-            $("body").append('<div class="modal" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true">' +
-            '<div class="modal-dialog modal-vertical-centered">' +
-            '    <div class="modal-content">' +
-            '        <div class="modal-header">' +
-            '            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>' +
-            '            <h4 class="modal-title" id="myModalLabel">Loading visualisation ...</h4>' +
-            '        </div>' +
-            '        <div class="modal-body" style="text-align:center">' +
-            '            <p><img src="/bms/libs/bmotion/bmotion.png" /></p>' +
-            '            <p><img src="/bms/libs/bmotion/spinner3-bluey.gif" /></p>' +
-            '        </div>' +
-            '    </div>' +
-            '</div>' +
-            '</div>')
-
-            $('#loadingModal').modal('show')
 
             if (standalone) {
                 $("body").append('<div title="SVG Editor" id="dialog_svgEditor"><iframe src="/bms/libs/bmseditor/index.html" frameBorder="0" id="iframe_svgEditor"></iframe></div>')

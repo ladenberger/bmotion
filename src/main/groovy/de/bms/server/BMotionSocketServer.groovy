@@ -136,7 +136,6 @@ public class BMotionSocketServer {
                     sessionConfiguration.bmsSvg[it] = (svgFile.exists() ? svgFile.text :
                             '<svg width="325" height="430" xmlns="http://www.w3.org/2000/svg"></svg>')
                 }
-
                 def BMotion bmotion = sessions.get(url.getPath()) ?: null
                 if (bmotion == null) {
                     bmotion = createSession(toolRegistry, sessionConfiguration.tool, templateFile, scriptEngineProvider,
@@ -146,18 +145,17 @@ public class BMotionSocketServer {
                 }
                 // Initialise session
                 bmotion.initSession(sessionConfiguration)
-
                 // Add client to session
                 bmotion.clients.add(client)
                 // Bound client to current visualisation
                 clients.put(client, url.getPath())
                 BMotionSocketServer.log.info "Refresh BMotion session " + bmotion.sessionId
-
                 // Send content of linked SVG files to client
                 if (ackRequest.isAckRequested()) {
                     def data = [bmsSvg: bmotion.sessionConfiguration.bmsSvg, standalone: standalone]
                     ackRequest.sendAckData(data)
                 }
+                bmotion.tool.refresh()
 
             }
         });

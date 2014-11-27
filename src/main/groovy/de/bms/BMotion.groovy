@@ -53,7 +53,9 @@ public class BMotion implements IToolListener {
 
     @Override
     public void animationChange(final String trigger, final ITool tool) {
-        observers.get(trigger)?.observers?.each { it.apply(this) }
+        if (this.tool.equals(tool)) {
+            observers.get(trigger)?.observers?.each { it.apply(this) }
+        }
     }
 
     // ---------- BMS API
@@ -137,7 +139,6 @@ public class BMotion implements IToolListener {
         initObservers()
         initGroovyScript(sessionConfiguration?.scriptPath)
         this.sessionConfiguration = sessionConfiguration
-        tool.refresh()
         initialised = true;
         log.debug "BMotion Session initialised"
     }
@@ -152,12 +153,9 @@ public class BMotion implements IToolListener {
     }
 
     private void initModel(String modelPath, boolean force = false) {
-        def String oldModelPath = this.sessionConfiguration?.modelPath
-        if (modelPath != null && (!modelPath.equals(oldModelPath) || force)) {
-            log.info "Loading model " + modelPath
-            tool.loadModel(getTemplateFolder() + File.separator + modelPath)
-            log.info "Model loaded"
-        }
+        log.info "Loading model " + modelPath
+        tool.loadModel(getTemplateFolder() + File.separator + modelPath, force)
+        log.info "Model loaded"
     }
 
     private void initGroovyScript(String scriptPath) {
