@@ -1,4 +1,6 @@
-package de.bms.server
+package de.bms
+
+import de.bms.server.BMotionScriptEngineProvider
 
 public class DefaultScriptEngineProvider implements BMotionScriptEngineProvider {
 

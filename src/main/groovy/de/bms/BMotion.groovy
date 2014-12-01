@@ -3,27 +3,23 @@ package de.bms
 import com.corundumstudio.socketio.SocketIOClient
 import com.google.common.base.Charsets
 import com.google.common.io.Resources
-import de.bms.itool.ITool
-import de.bms.itool.IToolListener
-import de.bms.itool.ToolRegistry
 import de.bms.observer.BMotionObserver
 import de.bms.observer.BMotionTransformer
 import de.bms.observer.TransformersObserver
 import de.bms.server.BMotionScriptEngineProvider
-import de.bms.server.DefaultScriptEngineProvider
 import de.bms.server.SessionConfiguration
 import groovy.util.logging.Slf4j
 
 @Slf4j
-public class BMotion implements IToolListener {
+public abstract class BMotion {
 
-    private final Map<String, Trigger> observers = [:]
+    def final static String TRIGGER_ANIMATION_CHANGED = "AnimationChanged"
 
-    private final Map<String, Closure> methods = [:]
+    def final Map<String, Trigger> observers = [:]
 
-    private TransformersObserver transformerObserver
+    def final Map<String, Closure> methods = [:]
 
-    public final static String TRIGGER_ANIMATION_CHANGED = "AnimationChanged"
+    def TransformersObserver transformerObserver
 
     def boolean initialised = false
 
@@ -31,31 +27,29 @@ public class BMotion implements IToolListener {
 
     def List<SocketIOClient> clients = new ArrayList<SocketIOClient>()
 
-    def ToolRegistry toolRegistry
-
     def SessionConfiguration sessionConfiguration
 
     def templatePath
 
-    def ITool tool
+    def final BMotionScriptEngineProvider scriptEngineProvider
 
-    def BMotionScriptEngineProvider scriptEngineProvider
-
-    public BMotion(final UUID sessionId, final ITool tool, final ToolRegistry toolRegistry, final String templatePath,
+    public BMotion(final UUID sessionId, final String templatePath,
                    final BMotionScriptEngineProvider scriptEngineProvider) {
         this.sessionId = sessionId
-        this.tool = tool
         this.templatePath = templatePath
-        this.toolRegistry = toolRegistry
         this.scriptEngineProvider = scriptEngineProvider
-        this.toolRegistry.registerListener(this)
     }
 
-    @Override
-    public void animationChange(final String trigger, final ITool tool) {
-        if (this.tool.equals(tool)) {
-            observers.get(trigger)?.observers?.each { it.apply(this) }
-        }
+    public BMotion(final UUID sessionId, final String templatePath) {
+        this(sessionId, templatePath, new DefaultScriptEngineProvider())
+    }
+
+    public void checkObserver(final String trigger) {
+        observers.get(trigger)?.observers?.each { it.apply(this) }
+    }
+
+    public void checkObserver() {
+        observers.get(TRIGGER_ANIMATION_CHANGED)?.observers?.each { it.apply(this) }
     }
 
     // ---------- BMS API
@@ -70,15 +64,8 @@ public class BMotion implements IToolListener {
         }
     }
 
-    /**
-     *
-     * This method calls a JavaScript method with the given json data.
-     *
-     * @param cmd The JavaScript method name to be called.
-     * @param json The json data.
-     */
-    public void apply(final String cmd, json) {
-        // client.sendEvent(cmd, json)
+    public void apply(final String name, data) {
+        clients.each { it.sendEvent(name, data) }
     }
 
     public void apply(final BMotionObserver o) {
@@ -89,6 +76,8 @@ public class BMotion implements IToolListener {
         o.each { apply(it) }
     }
 
+    public abstract Object executeEvent(final String event, final data) throws ImpossibleStepException
+
     /**
      *
      * This method evaluates a given formula and returns the result.
@@ -96,17 +85,10 @@ public class BMotion implements IToolListener {
      * @param formula
      *            The formula to evaluate
      * @return the result of the formula or null if no result was found or no
-     *         an exception was thrown
-     * @throws Exception
+     *         an exception was thrown.
+     * @throws IllegalFormulaException
      */
-    public Object eval(final String formula) throws Exception {
-        try {
-            Object evaluate = getTool().evaluate(getTool().getCurrentState(), formula);
-            return evaluate;
-        } catch (Exception e) {
-            log.error e.getMessage()
-        }
-    }
+    public abstract Object eval(final String formula) throws IllegalFormulaException
 
     /*public Object executeOperation(final Map<String, String[]> params) {
         String id = (params.get("id") != null && params.get("id").length > 0) ? params.get("id")[0] : "";
@@ -154,9 +136,13 @@ public class BMotion implements IToolListener {
 
     private void initModel(String modelPath, boolean force = false) {
         log.info "Loading model " + modelPath
-        tool.loadModel(modelPath != null ? getTemplateFolder() + File.separator + modelPath : null, force)
+        loadModel(modelPath != null ? getTemplateFolder() + File.separator + modelPath : null, force)
         log.info "Model loaded"
     }
+
+    public abstract void loadModel(String modelPath, boolean force)
+
+    public abstract void refresh()
 
     private void initGroovyScript(String scriptPath) {
         if (scriptPath) {
@@ -164,7 +150,6 @@ public class BMotion implements IToolListener {
             String templateFolder = getTemplateFolder()
             try {
                 log.info "Initialising Groovy Scripting Engine"
-                scriptEngineProvider = scriptEngineProvider ?: new DefaultScriptEngineProvider()
                 def GroovyShell shell = scriptEngineProvider.get()
                 shell.setVariable("bms", this);
                 shell.setVariable("templateFolder", templateFolder);
@@ -206,10 +191,6 @@ public class BMotion implements IToolListener {
 
     public SessionConfiguration getSessionConfiguration() {
         return sessionConfiguration
-    }
-
-    public ITool getTool() {
-        return tool
     }
 
     public String[] getScriptPaths() {

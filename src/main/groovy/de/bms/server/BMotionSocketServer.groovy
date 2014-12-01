@@ -8,8 +8,7 @@ import com.corundumstudio.socketio.listener.ConnectListener
 import com.corundumstudio.socketio.listener.DataListener
 import com.corundumstudio.socketio.listener.DisconnectListener
 import de.bms.BMotion
-import de.bms.itool.ITool
-import de.bms.itool.ToolRegistry
+import de.bms.BMotionVisualisationProvider
 import groovy.util.logging.Slf4j
 
 @Slf4j
@@ -20,15 +19,12 @@ public class BMotionSocketServer {
     def SocketIOServer server
 
     public void start(String host, int port, boolean standalone, String workspacePath,
-                      BMotionScriptEngineProvider scriptEngineProvider,
-                      BMotionIToolProvider iToolProvider) {
+                      BMotionVisualisationProvider visualisationProvider) {
 
         Configuration config = new Configuration();
         config.setHostname(host)
         config.setPort(port)
         server = new SocketIOServer(config);
-
-        ToolRegistry toolRegistry = new ToolRegistry()
 
         server.addConnectListener(new ConnectListener() {
             @Override
@@ -51,15 +47,31 @@ public class BMotionSocketServer {
         });
 
         //TODO: Check if return value of groovy method is a json object
-        server.addEventListener("callGroovyMethod", CallGroovyMethodObject.class,
-                new DataListener<CallGroovyMethodObject>() {
+        server.addEventListener("callGroovyMethod", NameDataObject.class,
+                new DataListener<NameDataObject>() {
                     @Override
-                    public void onData(final SocketIOClient client, CallGroovyMethodObject data,
+                    public void onData(final SocketIOClient client, NameDataObject data,
                                        final AckRequest ackRequest) {
                         String path = clients.get(client)
                         def BMotion bmotion = sessions.get(path) ?: null
                         if (bmotion != null) {
                             Object returnValue = bmotion.callGroovyMethod(data.name, data.data)
+                            if (ackRequest.isAckRequested()) {
+                                ackRequest.sendAckData(returnValue);
+                            }
+                        }
+                    }
+                });
+
+        server.addEventListener("executeEvent", NameDataObject.class,
+                new DataListener<NameDataObject>() {
+                    @Override
+                    public void onData(final SocketIOClient client, NameDataObject data,
+                                       final AckRequest ackRequest) {
+                        String path = clients.get(client)
+                        def BMotion bmotion = sessions.get(path) ?: null
+                        if (bmotion != null) {
+                            def returnValue = bmotion.executeEvent(data.name, data.data)
                             if (ackRequest.isAckRequested()) {
                                 ackRequest.sendAckData(returnValue);
                             }
@@ -117,7 +129,7 @@ public class BMotionSocketServer {
                             File svgFile = new File(bmotion.getTemplateFolder() + File.separator + svg.name)
                             svgFile.write(svg.content)
                             bmotion.sessionConfiguration.bmsSvg.put(svg.name, svg.content)
-                            bmotion.getTool().refresh()
+                            bmotion.refresh()
                         }
                     }
                 });
@@ -138,24 +150,24 @@ public class BMotionSocketServer {
                 }
                 def BMotion bmotion = sessions.get(url.getPath()) ?: null
                 if (bmotion == null) {
-                    bmotion = createSession(toolRegistry, sessionConfiguration.tool, templateFile, scriptEngineProvider,
-                            iToolProvider)
+                    bmotion = createSession(sessionConfiguration.tool, templateFile, visualisationProvider)
                     sessions.put(url.getPath(), bmotion)
                     BMotionSocketServer.log.info "Created new BMotion session " + bmotion.sessionId
                 }
-                // Initialise session
-                bmotion.initSession(sessionConfiguration)
                 // Add client to session
+                BMotionSocketServer.log.info "Add client " + client.sessionId + " for BMotion session " + bmotion.sessionId
                 bmotion.clients.add(client)
                 // Bound client to current visualisation
                 clients.put(client, url.getPath())
+                // Initialise session
+                bmotion.initSession(sessionConfiguration)
                 BMotionSocketServer.log.info "Refresh BMotion session " + bmotion.sessionId
                 // Send content of linked SVG files to client
                 if (ackRequest.isAckRequested()) {
                     def data = [bmsSvg: bmotion.sessionConfiguration.bmsSvg, standalone: standalone]
                     ackRequest.sendAckData(data)
                 }
-                bmotion.tool.refresh()
+                bmotion.refresh()
 
             }
         });
@@ -183,16 +195,10 @@ public class BMotionSocketServer {
 
     }
 
-    //TODO: Make initialisation of ITool implementations generic
-    private BMotion createSession(ToolRegistry toolRegistry, String toolId,
-                                  File templateFile, BMotionScriptEngineProvider scriptEngineProvider,
-                                  BMotionIToolProvider iToolProvider) {
-        //BMotionSocketServer.log.info "Going to create new session for " + sessionId
-        UUID sessionId = UUID.randomUUID()
-        if (toolId != null) {
-            def ITool tool = iToolProvider.get(toolId, toolRegistry)
-            return new BMotion(sessionId, tool, toolRegistry, templateFile.getPath(),
-                    scriptEngineProvider)
+    private BMotion createSession(String type, File templateFile, BMotionVisualisationProvider visualisationProvider) {
+        if (type != null) {
+            def visualisation = visualisationProvider.get(type, templateFile.getPath())
+            visualisation != null ? visualisation : "BMotion Studio: Not visualisation implementation found for " + type
         } else {
             log.error "BMotion Studio: Please enter a tool (e.g. BAnimation or CSPAnimation)"
         }

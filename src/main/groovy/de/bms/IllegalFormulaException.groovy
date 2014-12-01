@@ -1,4 +1,4 @@
-package de.bms.itool;
+package de.bms;
 
 public class IllegalFormulaException extends Exception {
 

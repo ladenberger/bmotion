@@ -1,6 +1,7 @@
 package de.bms.server
 
 import com.google.common.io.Resources
+import de.bms.BMotionVisualisationProvider
 import groovy.util.logging.Slf4j
 import org.apache.commons.cli.*
 import org.eclipse.jetty.server.Connector
@@ -16,9 +17,7 @@ public class BMotionServer {
 
     private String workspacePath
 
-    private BMotionScriptEngineProvider scriptEngineProvider
-
-    private BMotionIToolProvider itoolProvider
+    private BMotionVisualisationProvider visualisationProvider
 
     private URL[] resourcePaths
 
@@ -83,12 +82,8 @@ public class BMotionServer {
         this.workspacePath = workspacePath
     }
 
-    public void setScriptEngineProvider(BMotionScriptEngineProvider scriptEngineProvider) {
-        this.scriptEngineProvider = scriptEngineProvider
-    }
-
-    public void setIToolProvider(BMotionIToolProvider itoolProvider) {
-        this.itoolProvider = itoolProvider
+    public void setIToolProvider(BMotionVisualisationProvider visualisationProvider) {
+        this.visualisationProvider = visualisationProvider
     }
 
     public void setResourcePaths(URL[] resourcePaths) {
@@ -144,7 +139,7 @@ public class BMotionServer {
 
     private void startBMotionSocketServer() {
         socketServer = new BMotionSocketServer()
-        socketServer.start(socketHost, socketPort, standalone, workspacePath, scriptEngineProvider, itoolProvider)
+        socketServer.start(socketHost, socketPort, standalone, workspacePath, visualisationProvider)
     }
 
     public int getPort() {

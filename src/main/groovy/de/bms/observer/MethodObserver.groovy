@@ -9,6 +9,10 @@ class MethodObserver extends BMotionObserver {
     def _name
     def _data
 
+    def MethodObserver(name) {
+        this._name = name
+    }
+
     def static MethodObserver make(Closure cls) {
         new MethodObserver().with cls
     }

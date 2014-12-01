@@ -205,22 +205,26 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
 
     // ---------------------
 
+    var callFunction = function(functor, name, options) {
+        var fcallback = (typeof options.callback === "undefined") ? function (d) {} : options.callback
+        delete options.callback
+        var df = {
+            name: name,
+            data: options
+        };
+        socket.emit(functor, df, fcallback);
+    }
+
     // ---------------------
     // Return BMotion API functions
     // ---------------------
     return {
         socket: socket,
-        callMethod: function (n, d) {
-            var fSuccessFn = function (result) {
-            }
-            if (d.success !== "undefined") {
-                fSuccessFn = d.success
-            }
-            var df = {
-                name: n,
-                data: d.data
-            };
-            socket.emit('callGroovyMethod', df, fSuccessFn);
+        call: function(name, options) {
+            callFunction('callGroovyMethod', name, options)
+        },
+        executeEvent: function(name, options) {
+            callFunction('executeEvent', name, options)
         }
     }
 

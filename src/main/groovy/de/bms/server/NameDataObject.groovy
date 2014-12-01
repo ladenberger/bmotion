@@ -1,13 +1,13 @@
 package de.bms.server
 
-public class CallGroovyMethodObject {
+public class NameDataObject {
 
     def String name
     def data
 
-    public CallGroovyMethodObject() {}
+    public NameDataObject() {}
 
-    public CallGroovyMethodObject(String name, data) {
+    public NameDataObject(String name, data) {
         super();
         this.name = name
         this.data = data
