@@ -135,12 +135,15 @@ public abstract class BMotion {
     }
 
     private void initModel(String modelPath, boolean force = false) {
-        log.info "Loading model " + modelPath
-        loadModel(modelPath != null ? getTemplateFolder() + File.separator + modelPath : null, force)
-        log.info "Model loaded"
+        File modelFile = new File(getTemplateFolder() + File.separator + modelPath)
+        if (modelFile.exists()) {
+            log.info "Loading model " + modelPath
+            loadModel(modelFile, force)
+            log.info "Model loaded"
+        }
     }
 
-    public abstract void loadModel(String modelPath, boolean force)
+    public abstract void loadModel(File modelFile, boolean force)
 
     public abstract void refresh()
 
