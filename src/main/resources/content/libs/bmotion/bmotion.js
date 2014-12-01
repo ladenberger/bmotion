@@ -221,7 +221,7 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
     return {
         socket: socket,
         call: function(name, options) {
-            callFunction('callGroovyMethod', name, options)
+            callFunction('callMethod', name, options)
         },
         executeEvent: function(name, options) {
             callFunction('executeEvent', name, options)

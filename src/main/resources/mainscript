@@ -1,4 +1,4 @@
-Script.getMetaClass().call = { a1,a2 ->
+Script.getMetaClass().callMethod = { a1,a2 ->
 	new MethodObserver(a1).with a2
 }
 
