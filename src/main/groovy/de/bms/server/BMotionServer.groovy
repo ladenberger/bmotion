@@ -82,7 +82,7 @@ public class BMotionServer {
         this.workspacePath = workspacePath
     }
 
-    public void setIToolProvider(BMotionVisualisationProvider visualisationProvider) {
+    public void setVisualisationProvider(BMotionVisualisationProvider visualisationProvider) {
         this.visualisationProvider = visualisationProvider
     }
 
