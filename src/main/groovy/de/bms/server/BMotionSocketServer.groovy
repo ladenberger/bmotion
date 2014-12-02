@@ -108,12 +108,17 @@ public class BMotionSocketServer {
                     }
                 });
 
-        server.addEventListener("initSvg", String.class,
+        server.addEventListener("initialisation", String.class,
                 new DataListener<String>() {
                     @Override
                     public void onData(final SocketIOClient client, String d,
                                        final AckRequest ackRequest) {
-                        client.sendEvent("initSvg")
+                        String path = clients.get(client)
+                        def BMotion bmotion = sessions.get(path) ?: null
+                        if (bmotion != null) {
+                            client.sendEvent("initialisation", bmotion.sessionConfiguration)
+                            client.sendEvent("initSvg")
+                        }
                     }
                 });
 
@@ -198,7 +203,7 @@ public class BMotionSocketServer {
     private BMotion createSession(String type, File templateFile, BMotionVisualisationProvider visualisationProvider) {
         if (type != null) {
             def visualisation = visualisationProvider.get(type, templateFile.getPath())
-            visualisation != null ? visualisation : "BMotion Studio: Not visualisation implementation found for " + type
+            visualisation != null ? visualisation : "BMotion Studio: No visualisation implementation found for " + type
         } else {
             log.error "BMotion Studio: Please enter a tool (e.g. BAnimation or CSPAnimation)"
         }

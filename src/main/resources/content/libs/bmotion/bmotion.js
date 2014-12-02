@@ -166,7 +166,6 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
                 if (standalone)
                     $("#bmotion-navigation-svg").append('<li><a href="#" data-svg="' + i + '"><i class="glyphicon glyphicon-pencil"></i> ' + i + '</a></li>')
             });
-            socket.emit('initSvg');
 
             if (standalone) {
                 // Open SVG Editor
@@ -182,6 +181,8 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
                     });
                 })
             }
+
+            socket.emit('initialisation');
 
             $('#loadingModal').modal('hide')
 
