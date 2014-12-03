@@ -47,7 +47,7 @@ public class BMotionSocketServer {
         });
 
         //TODO: Check if return value of groovy method is a json object
-        server.addEventListener("callGroovyMethod", NameDataObject.class,
+        server.addEventListener("callMethod", NameDataObject.class,
                 new DataListener<NameDataObject>() {
                     @Override
                     public void onData(final SocketIOClient client, NameDataObject data,
