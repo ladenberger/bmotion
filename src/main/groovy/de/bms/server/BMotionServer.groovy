@@ -33,15 +33,8 @@ public class BMotionServer {
     def String host = "localhost"
     def String socketHost = "localhost"
 
-    public BMotionServer(String workspacePath) {
-        this.workspacePath = workspacePath
-    }
+    public BMotionServer(String[] args, BMotionVisualisationProvider visualisationProvider) {
 
-    public BMotionServer(String[] args) {
-        parseCommandLine(args)
-    }
-
-    private void parseCommandLine(args) {
         Options options = new Options()
         options.addOption(OptionBuilder.withArgName("workspace").hasArg()
                 .withDescription("Workspace").create("workspace"))
@@ -76,14 +69,10 @@ public class BMotionServer {
         if (line.hasOption("standalone")) {
             this.standalone = true
         }
-    }
 
-    public void setWorkspacePath(String workspacePath) {
-        this.workspacePath = workspacePath
-    }
+        // Create socket server
+        socketServer = new BMotionSocketServer(standalone, workspacePath, visualisationProvider)
 
-    public void setVisualisationProvider(BMotionVisualisationProvider visualisationProvider) {
-        this.visualisationProvider = visualisationProvider
     }
 
     public void setResourcePaths(URL[] resourcePaths) {
@@ -138,8 +127,7 @@ public class BMotionServer {
     }
 
     private void startBMotionSocketServer() {
-        socketServer = new BMotionSocketServer()
-        socketServer.start(socketHost, socketPort, standalone, workspacePath, visualisationProvider)
+        socketServer.start(socketHost, socketPort)
     }
 
     public int getPort() {

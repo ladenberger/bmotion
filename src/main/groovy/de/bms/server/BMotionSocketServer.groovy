@@ -18,13 +18,13 @@ public class BMotionSocketServer {
     public final Map<SocketIOClient, String> clients = new HashMap<SocketIOClient, String>();
     def SocketIOServer server
 
-    public void start(String host, int port, boolean standalone, String workspacePath,
-                      BMotionVisualisationProvider visualisationProvider) {
+    public BMotionSocketServer(boolean standalone, String workspacePath,
+                               BMotionVisualisationProvider visualisationProvider) {
 
-        Configuration config = new Configuration();
-        config.setHostname(host)
-        config.setPort(port)
-        server = new SocketIOServer(config);
+        def config = new Configuration()
+        config.setHostname("localhost")
+        config.setPort(9090)
+        server = new SocketIOServer(config)
 
         server.addConnectListener(new ConnectListener() {
             @Override
@@ -118,6 +118,7 @@ public class BMotionSocketServer {
                         if (bmotion != null) {
                             client.sendEvent("initialisation", bmotion.sessionConfiguration)
                             client.sendEvent("initSvg")
+                            bmotion.refresh()
                         }
                     }
                 });
@@ -172,10 +173,13 @@ public class BMotionSocketServer {
                     def data = [bmsSvg: bmotion.sessionConfiguration.bmsSvg, standalone: standalone]
                     ackRequest.sendAckData(data)
                 }
-                bmotion.refresh()
 
             }
         });
+
+    }
+
+    public void start(String host, int port) {
 
         new Thread(new Runnable() {
             public void run() {
@@ -183,6 +187,7 @@ public class BMotionSocketServer {
                 while (!found && port < 9180) {
                     try {
                         found = true;
+                        server.getConfiguration().setHostname(host)
                         server.getConfiguration().setPort(port)
                         server.start();
                         log.info "Socket.io started on host " + host + " and port " + port
