@@ -18,6 +18,10 @@ require.config({
         "jquery-cookie": {
             exports: "$",
             "deps": ['jquery']
+        },
+        "tooltipster": {
+            exports: "$",
+            "deps": ['jquery']
         }
     },
     paths: {
@@ -31,10 +35,13 @@ require.config({
         "bootstrap-css": "/bms/libs/bootstrap/css/bootstrap.min",
         "jquery-ui-css": "/bms/libs/jquery-ui/jquery-ui.min",
         "jquery-ui-theme-css": "/bms/libs/jquery-ui/jquery-ui.theme.min",
+        "tooltipster": "/bms/libs/tooltipster/jquery.tooltipster.min",
+        "tooltipster-css": "/bms/libs/tooltipster/tooltipster",
+        "tooltipster-shadow-css": "/bms/libs/tooltipster/themes/tooltipster-shadow",
         "bmotion-css": "/bms/libs/bmotion/bmotion"
     }
 });
-define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "css!bmotion-css", "bootstrap", "jquery-ui", "jquery-cookie", "socketio"], function () {
+define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "css!tooltipster-css", "css!tooltipster-shadow-css", "css!bmotion-css", "bootstrap", "jquery-ui", "jquery-cookie", "tooltipster", "socketio"], function () {
 
     // ---------------------
     // Establish client socket
@@ -206,8 +213,10 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
 
     // ---------------------
 
-    var callFunction = function(functor, name, options) {
-        var fcallback = (typeof options.callback === "undefined") ? function (d) {} : options.callback
+    var callFunction = function (functor, name, options) {
+        options = options === undefined ? {} : options
+        var fcallback = (typeof options.callback === "undefined") ? function (d) {
+        } : options.callback
         delete options.callback
         var df = {
             name: name,
@@ -216,15 +225,29 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
         socket.emit(functor, df, fcallback);
     }
 
+    // --------------------- Extend jQuery
+    $.fn.executeEvent = function (name, options) {
+        return $(this).click(function () {
+            callFunction('executeEvent', name, options)
+        }).css('cursor', 'pointer')
+    }
+
+    $.fn.callMethod = function (name, options) {
+        return $(this).click(function () {
+            callFunction('callMethod', name, options)
+        }).css('cursor', 'pointer')
+    }
+    // ---------------------
+
     // ---------------------
     // Return BMotion API functions
     // ---------------------
     return {
         socket: socket,
-        callMethod: function(name, options) {
+        callMethod: function (name, options) {
             callFunction('callMethod', name, options)
         },
-        executeEvent: function(name, options) {
+        executeEvent: function (name, options) {
             callFunction('executeEvent', name, options)
         }
     }
