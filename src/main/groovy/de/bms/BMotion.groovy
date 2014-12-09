@@ -46,10 +46,11 @@ public abstract class BMotion {
 
     public void checkObserver(final String trigger) {
         observers.get(trigger)?.observers?.each { it.apply(this) }
+        clients.each { it.sendEvent("checkObserver", trigger) }
     }
 
     public void checkObserver() {
-        observers.get(TRIGGER_ANIMATION_CHANGED)?.observers?.each { it.apply(this) }
+        checkObserver(TRIGGER_ANIMATION_CHANGED)
     }
 
     // ---------- BMS API

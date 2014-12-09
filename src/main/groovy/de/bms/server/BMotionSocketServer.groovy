@@ -82,8 +82,20 @@ public class BMotionSocketServer {
         server.addEventListener("observe", JsonObject.class,
                 new DataListener<JsonObject>() {
                     @Override
-                    public void onData(final SocketIOClient client, JsonObject data,
-                                       final AckRequest ackRequest) {}
+                    public void onData(final SocketIOClient client, JsonObject d,
+                                       final AckRequest ackRequest) {
+                        String path = clients.get(client)
+                        def BMotion bmotion = sessions.get(path) ?: null
+                        if (bmotion != null) {
+                            def expressions = d.data.expressions
+                            def returnValue = expressions.collect {
+                                bmotion.eval(it)
+                            }
+                            if (ackRequest.isAckRequested()) {
+                                ackRequest.sendAckData( [ returnValue ]);
+                            }
+                        }
+                    }
                 });
 
         server.addEventListener("reloadModel", String.class,
