@@ -76,7 +76,7 @@ public abstract class BMotion {
         o.each { apply(it) }
     }
 
-    public abstract Object executeEvent(final String event, final data) throws ImpossibleStepException
+    public abstract Object executeEvent(final data) throws ImpossibleStepException
 
     /**
      *

@@ -213,28 +213,34 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
 
     // ---------------------
 
-    var callFunction = function (functor, name, options) {
-        options = options === undefined ? {} : options
-        var fcallback = (typeof options.callback === "undefined") ? function (d) {
-        } : options.callback
-        delete options.callback
-        var df = {
-            name: name,
-            data: options
-        };
-        socket.emit(functor, df, fcallback);
+    var executeEvent = function (options) {
+        var settings = $.extend({
+            events: [],
+            callback: function () {
+            }
+        }, options);
+        socket.emit("executeEvent", {data: settings}, settings.callback);
+    }
+
+    var callMethod = function (options) {
+        var settings = $.extend({
+            name: "",
+            callback: function () {
+            }
+        }, options);
+        socket.emit("callMethod", {data: settings}, settings.callback);
     }
 
     // --------------------- Extend jQuery
-    $.fn.executeEvent = function (name, options) {
-        return $(this).click(function () {
-            callFunction('executeEvent', name, options)
+    $.fn.executeEvent = function (options) {
+        return this.click(function () {
+            executeEvent(options)
         }).css('cursor', 'pointer')
     }
 
-    $.fn.callMethod = function (name, options) {
-        return $(this).click(function () {
-            callFunction('callMethod', name, options)
+    $.fn.callMethod = function (options) {
+        return this.click(function () {
+            callMethod(options)
         }).css('cursor', 'pointer')
     }
     // ---------------------
@@ -244,15 +250,15 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
     // ---------------------
     return {
         socket: socket,
-        callMethod: function (name, options) {
-            callFunction('callMethod', name, options)
+        callMethod: function (options) {
+            callMethod(options)
         },
-        executeEvent: function (name, options) {
-            callFunction('executeEvent', name, options)
+        executeEvent: function (options) {
+            executeEvent(options)
         }
     }
 
-});
+})
 
 function fixSizeDialog(dialog, obj, ox, oy) {
     var newwidth = dialog.parent().width() - ox

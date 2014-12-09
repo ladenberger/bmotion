@@ -47,15 +47,15 @@ public class BMotionSocketServer {
         });
 
         //TODO: Check if return value of groovy method is a json object
-        server.addEventListener("callMethod", NameDataObject.class,
-                new DataListener<NameDataObject>() {
+        server.addEventListener("callMethod", JsonObject.class,
+                new DataListener<JsonObject>() {
                     @Override
-                    public void onData(final SocketIOClient client, NameDataObject data,
+                    public void onData(final SocketIOClient client, JsonObject d,
                                        final AckRequest ackRequest) {
                         String path = clients.get(client)
                         def BMotion bmotion = sessions.get(path) ?: null
                         if (bmotion != null) {
-                            Object returnValue = bmotion.callGroovyMethod(data.name, data.data)
+                            Object returnValue = bmotion.callGroovyMethod(d.data.name, data)
                             if (ackRequest.isAckRequested()) {
                                 ackRequest.sendAckData(returnValue);
                             }
@@ -63,20 +63,27 @@ public class BMotionSocketServer {
                     }
                 });
 
-        server.addEventListener("executeEvent", NameDataObject.class,
-                new DataListener<NameDataObject>() {
+        server.addEventListener("executeEvent", JsonObject.class,
+                new DataListener<JsonObject>() {
                     @Override
-                    public void onData(final SocketIOClient client, NameDataObject data,
+                    public void onData(final SocketIOClient client, JsonObject d,
                                        final AckRequest ackRequest) {
                         String path = clients.get(client)
                         def BMotion bmotion = sessions.get(path) ?: null
                         if (bmotion != null) {
-                            def returnValue = bmotion.executeEvent(data.name, data.data)
+                            def returnValue = bmotion.executeEvent(d.data)
                             if (ackRequest.isAckRequested()) {
                                 ackRequest.sendAckData(returnValue);
                             }
                         }
                     }
+                });
+
+        server.addEventListener("observe", JsonObject.class,
+                new DataListener<JsonObject>() {
+                    @Override
+                    public void onData(final SocketIOClient client, JsonObject data,
+                                       final AckRequest ackRequest) {}
                 });
 
         server.addEventListener("reloadModel", String.class,
