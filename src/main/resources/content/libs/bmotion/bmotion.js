@@ -244,13 +244,13 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
         var observe = function (options, origin) {
             var settings = $.extend({
                 expressions: [],
-                trigger: "AnimationChanged",
-                callback: function () {
+                cause: "AnimationChanged",
+                trigger: function () {
                 }
             }, options);
             $(document).bind("checkObserver_" + settings.trigger, function () {
                 socket.emit("observe", {data: settings}, function (data) {
-                    origin !== undefined ? settings.callback.call(this, origin, data) : settings.callback.call(this, data)
+                    origin !== undefined ? settings.trigger.call(this, origin, data) : settings.trigger.call(this, data)
                 });
             });
         }
