@@ -248,7 +248,7 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
                 trigger: function () {
                 }
             }, options);
-            $(document).bind("checkObserver_" + settings.trigger, function () {
+            $(document).bind("checkObserver_" + settings.cause, function () {
                 socket.emit("observe", {data: settings}, function (data) {
                     origin !== undefined ? settings.trigger.call(this, origin, data) : settings.trigger.call(this, data)
                 });
