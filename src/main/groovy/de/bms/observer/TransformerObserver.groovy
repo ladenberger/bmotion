@@ -1,12 +1,11 @@
 package de.bms.observer
 
-import com.google.gson.Gson
 import de.bms.BMotion
 import de.bms.BMotionScriptException
 import groovy.util.logging.Slf4j
 
 @Slf4j
-class TransformerObserver extends BMotionObserver implements BMotionTransformer {
+class TransformerObserver extends BMotionTransformer {
 
     def _selector
 
@@ -15,8 +14,6 @@ class TransformerObserver extends BMotionObserver implements BMotionTransformer 
     def _styles = [:]
 
     def _content
-
-    private final Gson g = new Gson()
 
     def TransformerObserver() {}
 
@@ -62,11 +59,6 @@ class TransformerObserver extends BMotionObserver implements BMotionTransformer 
         } catch (Exception e) {
             BMotionScriptException.checkForScriptErrors(e, bms.getScriptPaths())
         }
-    }
-
-    @Override
-    def apply(BMotion bms) {
-        bms.clients.each { it.sendEvent("applyTransformers", g.toJson(update(bms))) }
     }
 
 }
