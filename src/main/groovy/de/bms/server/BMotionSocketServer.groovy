@@ -92,7 +92,7 @@ public class BMotionSocketServer {
                                 bmotion.eval(it)
                             }
                             if (ackRequest.isAckRequested()) {
-                                ackRequest.sendAckData( [ returnValue ]);
+                                ackRequest.sendAckData([values: returnValue]);
                             }
                         }
                     }
