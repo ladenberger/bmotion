@@ -54,7 +54,7 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
             '    <div class="modal-content">' +
             '        <div class="modal-header">' +
             '            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>' +
-            '            <h4 class="modal-title" id="myModalLabel">Loading visualisation ...</h4>' +
+            '            <h4 class="modal-title" id="loadingModalText">Loading visualisation ...</h4>' +
             '        </div>' +
             '        <div class="modal-body" style="text-align:center">' +
             '            <p><img src="/bms/libs/bmotion/bmotion.png" /></p>' +
@@ -159,7 +159,10 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
                     });
 
                     $("#bt_reloadModel").click(function () {
+                        $('#loadingModalText').html("Reloading model ...")
+                        $('#loadingModal').modal('show')
                         socket.emit('reloadModel', function () {
+                            $('#loadingModal').modal('hide')
                         });
                     });
                 }
