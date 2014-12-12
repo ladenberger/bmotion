@@ -79,7 +79,7 @@ public class BMotionSocketServer {
                     }
                 });
 
-        server.addEventListener("observe", JsonObject.class,
+        server.addEventListener("transform", JsonObject.class,
                 new DataListener<JsonObject>() {
                     @Override
                     public void onData(final SocketIOClient client, JsonObject d,

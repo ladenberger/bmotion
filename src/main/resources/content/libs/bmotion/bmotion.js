@@ -244,7 +244,7 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
             });
         }
 
-        var observe = function (options, origin) {
+        var transform = function (options, origin) {
             var settings = $.extend({
                 expressions: [],
                 cause: "AnimationChanged",
@@ -252,7 +252,7 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
                 }
             }, options);
             $(document).bind("checkObserver_" + settings.cause, function () {
-                socket.emit("observe", {data: settings}, function (data) {
+                socket.emit("transform", {data: settings}, function (data) {
                     origin !== undefined ? settings.trigger.call(this, origin, data) : settings.trigger.call(this, data)
                 });
             });
@@ -270,8 +270,8 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
             }).css('cursor', 'pointer')
         }
 
-        $.fn.observe = function (options) {
-            observe(options, this)
+        $.fn.transform = function (options) {
+            transform(options, this)
             return this
         }
         // ---------------------
@@ -287,8 +287,8 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
             executeEvent: function (options, origin) {
                 executeEvent(options, origin)
             },
-            observe: function (options, origin) {
-                observe(options, origin)
+            transform: function (options, origin) {
+                transform(options, origin)
             }
         }
 
