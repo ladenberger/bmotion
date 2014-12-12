@@ -55,7 +55,7 @@ public class BMotionSocketServer {
                         String path = clients.get(client)
                         def BMotion bmotion = sessions.get(path) ?: null
                         if (bmotion != null) {
-                            Object returnValue = bmotion.callGroovyMethod(d.data.name, data)
+                            Object returnValue = bmotion.callGroovyMethod(d.data.name, d)
                             if (ackRequest.isAckRequested()) {
                                 ackRequest.sendAckData(returnValue);
                             }
