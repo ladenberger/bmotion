@@ -228,7 +228,7 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
                 callback: function () {
                 }
             }, options);
-            socket.emit("executeEvent", {data: settings}, function (data) {
+            socket.emit("executeEvent", {data: normalize(settings, ["callback"], origin)}, function (data) {
                 origin !== undefined ? settings.callback.call(this, origin, data) : settings.callback.call(this, data)
             });
         }
@@ -239,18 +239,18 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
                 callback: function () {
                 }
             }, options);
-            socket.emit("callMethod", {data: settings}, function (data) {
+            socket.emit("callMethod", {data: normalize(settings, ["callback"], origin)}, function (data) {
                 origin !== undefined ? settings.callback.call(this, origin, data) : settings.callback.call(this, data)
             });
         }
 
         var transform = function (options, origin) {
-            var settings = $.extend({
+            var settings = normalize($.extend({
                 expressions: [],
                 cause: "AnimationChanged",
                 trigger: function () {
                 }
-            }, options);
+            }, options), ["trigger"], origin);
             $(document).bind("checkObserver_" + settings.cause, function () {
                 socket.emit("transform", {data: settings}, function (data) {
                     origin !== undefined ? settings.trigger.call(this, origin, data) : settings.trigger.call(this, data)
@@ -299,4 +299,33 @@ function fixSizeDialog(dialog, obj, ox, oy) {
     var newwidth = dialog.parent().width() - ox
     var newheight = dialog.parent().height() - oy
     obj.attr("style", "width:" + (newwidth) + "px;height:" + (newheight - 50) + "px");
+}
+
+function normalize(obj, exclude, origin) {
+    exclude === 'undefined' ? [] : exclude
+    var obj2 = $.extend(true, {}, obj)
+    _normalize(obj2, exclude, origin)
+    return obj2
+}
+
+function _normalize(obj, exclude, origin) {
+    for (var property in obj) {
+        if (obj.hasOwnProperty(property)) {
+            if (typeof obj[property] == "object") {
+                _normalize(obj[property], exclude, origin);
+            } else {
+                if ($.inArray(property, exclude) === -1) {
+                    if (isFunction(obj[property])) {
+                        var r = origin !== undefined ? obj[property](origin) : obj[property]()
+                        obj[property] = r
+                    }
+                }
+            }
+        }
+    }
+}
+
+function isFunction(functionToCheck) {
+    var getType = {};
+    return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
 }
