@@ -103,9 +103,9 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
                     '            </div>' +
                     '            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">' +
                     '                <ul class="nav navbar-nav navbar-right" id="bmotion-navigation">' +
-                    '                    <li class="dropdown">' +
+                    '                    <li class="dropdown" id="bmotion-navigation-svg-dropdown">' +
                     '                        <a href="#" id="bt_open_SvgEditor" class="dropdown-toggle" data-toggle="dropdown"> Edit SVG <span class="caret"></a>' +
-                    '                        <ul class="dropdown-menu" role="menu" id="bmotion-navigation-svg">' +
+                    '                        <ul class="dropdown-menu" role="menu" id="bmotion-navigation-svg-ul">' +
                     '                        </ul>' +
                     '                    </li>' +
                     '                    <li class="dropdown">' +
@@ -168,18 +168,22 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
                 }
 
                 // Replace linked SVG files with content and add corresponding menu items
+
+                var hasSvg = false
                 $.each(data.bmsSvg, function (i, v) {
                     var orgSvg = $("object[data='" + i + "']")
                     var newSvg = $(v)
                     newSvg.attr("data-svg", i)
                     orgSvg.replaceWith(newSvg)
+                    hasSvg = true
                     if (standalone)
-                        $("#bmotion-navigation-svg").append('<li><a href="#" data-svg="' + i + '"><i class="glyphicon glyphicon-pencil"></i> ' + i + '</a></li>')
+                        $("#bmotion-navigation-svg-ul").append('<li><a href="#" data-svg="' + i + '"><i class="glyphicon glyphicon-pencil"></i> ' + i + '</a></li>')
                 });
+                if (!hasSvg) $("#bmotion-navigation-svg-dropdown").remove()
 
                 if (standalone) {
                     // Open SVG Editor
-                    var svgAItems = $("#bmotion-navigation-svg").find("a")
+                    var svgAItems = $("#bmotion-navigation-svg-ul").find("a")
                     svgAItems.click(function () {
                         var svgFile = $(this).attr("data-svg")
                         socket.emit('initSvgEditor', svgFile, function (svg) {
