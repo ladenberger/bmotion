@@ -250,6 +250,7 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
 
         var transform = function (options, origin) {
             var settings = normalize($.extend({
+                selector: null,
                 expressions: [],
                 cause: "AnimationChanged",
                 trigger: function () {
@@ -257,7 +258,8 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
             }, options), ["trigger"], origin);
             $(document).bind("checkObserver_" + settings.cause, function () {
                 socket.emit("transform", {data: settings}, function (data) {
-                    origin !== undefined ? settings.trigger.call(this, origin, data) : settings.trigger.call(this, data)
+                    var el = settings.selector !== null ? $(settings.selector) : origin
+                    el !== undefined ? settings.trigger.call(this, el, data) : settings.trigger.call(this, data)
                 });
             });
         }
