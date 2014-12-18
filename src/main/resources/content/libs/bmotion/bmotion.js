@@ -235,6 +235,7 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
             socket.emit("executeEvent", {data: normalize(settings, ["callback"], origin)}, function (data) {
                 origin !== undefined ? settings.callback.call(this, origin, data) : settings.callback.call(this, data)
             });
+            return settings
         }
 
         var callMethod = function (options, origin) {
@@ -246,6 +247,7 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
             socket.emit("callMethod", {data: normalize(settings, ["callback"], origin)}, function (data) {
                 origin !== undefined ? settings.callback.call(this, origin, data) : settings.callback.call(this, data)
             });
+            return settings
         }
 
         var transform = function (options, origin) {
@@ -262,6 +264,7 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
                     el !== undefined ? settings.trigger.call(this, el, data) : settings.trigger.call(this, data)
                 });
             });
+            return settings
         }
         // --------------------- Extend jQuery
         $.fn.executeEvent = function (options) {
@@ -288,13 +291,13 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
         return {
             socket: socket,
             callMethod: function (options, origin) {
-                callMethod(options, origin)
+                return callMethod(options, origin)
             },
             executeEvent: function (options, origin) {
-                executeEvent(options, origin)
+                return executeEvent(options, origin)
             },
             transform: function (options, origin) {
-                transform(options, origin)
+                return transform(options, origin)
             }
         }
 
