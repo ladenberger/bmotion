@@ -87,8 +87,8 @@ public class BMotionSocketServer {
                         String path = clients.get(client)
                         def BMotion bmotion = sessions.get(path) ?: null
                         if (bmotion != null) {
-                            def expressions = d.data.expressions
-                            def returnValue = expressions.collect {
+                            def formulas = d.data.formulas
+                            def returnValue = formulas.collect {
                                 bmotion.eval(it)
                             }
                             if (ackRequest.isAckRequested()) {

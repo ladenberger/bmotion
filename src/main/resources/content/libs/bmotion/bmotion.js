@@ -251,7 +251,7 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
         var transform = function (options, origin) {
             var settings = normalize($.extend({
                 selector: null,
-                expressions: [],
+                formulas: [],
                 cause: "AnimationChanged",
                 trigger: function () {
                 }
