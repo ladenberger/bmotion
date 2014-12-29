@@ -250,7 +250,7 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
             return settings
         }
 
-        var transform = function (options, origin) {
+        var observe = function (options, origin) {
             var settings = normalize($.extend({
                 selector: null,
                 formulas: [],
@@ -259,9 +259,26 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
                 }
             }, options), ["trigger"], origin);
             $(document).bind("checkObserver_" + settings.cause, function () {
-                socket.emit("transform", {data: settings}, function (data) {
+                socket.emit("observe", {data: settings}, function (data) {
                     var el = settings.selector !== null ? $(settings.selector) : origin
                     el !== undefined ? settings.trigger.call(this, el, data) : settings.trigger.call(this, data)
+                });
+            });
+            return settings
+        }
+
+        var observeMethod = function (options, origin) {
+            var settings = normalize($.extend({
+                selector: null,
+                name: "",
+                cause: "AnimationChanged",
+                callback: function (data) {
+                }
+            }, options), ["callback"], origin);
+            $(document).bind("checkObserver_" + settings.cause, function () {
+                socket.emit("callMethod", {data: settings}, function (data) {
+                    var el = settings.selector !== null ? $(settings.selector) : origin
+                    el !== undefined ? settings.callback.call(this, el, data) : settings.callback.call(this, data)
                 });
             });
             return settings
@@ -279,8 +296,13 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
             }).css('cursor', 'pointer')
         }
 
-        $.fn.transform = function (options) {
-            transform(options, this)
+        $.fn.observe = function (options) {
+            observe(options, this)
+            return this
+        }
+
+        $.fn.observeMethod = function (options) {
+            observeMethod(options, this)
             return this
         }
         // ---------------------
@@ -296,8 +318,11 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
             executeEvent: function (options, origin) {
                 return executeEvent(options, origin)
             },
-            transform: function (options, origin) {
-                return transform(options, origin)
+            observe: function (options, origin) {
+                return observe(options, origin)
+            },
+            observeMethod: function (options, origin) {
+                return observeMethod(options, origin)
             }
         }
 
