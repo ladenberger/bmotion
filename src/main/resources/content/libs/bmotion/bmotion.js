@@ -1,206 +1,18 @@
-require.config({
-    map: {
-        '*': {
-            'css': '/bms/libs/require-css/css.min.js'
-        }
-    },
-    shim: {
-        "socketio": {
-            exports: 'io'
-        },
-        "bootstrap": {
-            "deps": ['jquery']
-        },
-        "jquery-ui": {
-            exports: "$",
-            "deps": ['jquery']
-        },
-        "jquery-cookie": {
-            exports: "$",
-            "deps": ['jquery']
-        },
-        "tooltipster": {
-            exports: "$",
-            "deps": ['jquery']
-        }
-    },
-    paths: {
-        "jquery": "/bms/libs/jquery/jquery-1.11.0.min",
-        "jquery-ui": "/bms/libs/jquery-ui/jquery-ui.min",
-        "jquery-cookie": "/bms/libs/jquery-cookie/jquery.cookie",
-        "bootstrap": "/bms/libs/bootstrap/js/bootstrap.min",
-        "socketio": "/bms/libs/socket.io/socket.io",
-        "common": "/bms/libs/common/common",
-        "bmotion": "/bms/libs/bmotion/bmotion",
-        "bootstrap-css": "/bms/libs/bootstrap/css/bootstrap.min",
-        "jquery-ui-css": "/bms/libs/jquery-ui/jquery-ui.min",
-        "jquery-ui-theme-css": "/bms/libs/jquery-ui/jquery-ui.theme.min",
-        "tooltipster": "/bms/libs/tooltipster/jquery.tooltipster.min",
-        "tooltipster-css": "/bms/libs/tooltipster/tooltipster",
-        "tooltipster-shadow-css": "/bms/libs/tooltipster/themes/tooltipster-shadow",
-        "bmotion-css": "/bms/libs/bmotion/bmotion"
-    }
-});
-define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "css!tooltipster-css", "css!tooltipster-shadow-css", "css!bmotion-css", "bootstrap", "jquery-ui", "jquery-cookie", "tooltipster", "socketio"], function () {
+define(["jquery", "socketio", 'css!bmotion-css'], function () {
 
         // ---------------------
         // Establish client socket
         // ---------------------
         var socket = io.connect('http://localhost:9090');
-        socket.on('connect', function () {
 
-            $("body").append('<div class="modal" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true">' +
-            '<div class="modal-dialog modal-vertical-centered">' +
-            '    <div class="modal-content">' +
-            '        <div class="modal-header">' +
-            '            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>' +
-            '            <h4 class="modal-title" id="loadingModalText">Loading visualisation ...</h4>' +
-            '        </div>' +
-            '        <div class="modal-body" style="text-align:center">' +
-            '            <p><img src="/bms/libs/bmotion/bmotion.png" /></p>' +
-            '            <p><img src="/bms/libs/bmotion/spinner3-bluey.gif" /></p>' +
-            '        </div>' +
-            '    </div>' +
-            '</div>' +
-            '</div>')
+        var observers = {};
 
-            $('#loadingModal').modal('show')
-
-            var bmsSvg = {};
-            $("object[data-bms=svg]").map(function () {
-                bmsSvg[$(this).attr('data')] = ""
-            });
-
-            var event = {
-                templateUrl: document.URL,
-                scriptPath: $("meta[name='bms.script']").attr("content"),
-                modelPath: $("meta[name='bms.model']").attr("content"),
-                tool: $("meta[name='bms.tool']").attr("content"),
-                bmsSvg: bmsSvg
-            };
-            socket.emit('initSession', event, function (data) {
-
-                var standalone = data.standalone
-
-                // Callback after initialising BMotion session
-
-                if (standalone) {
-                    $("body").append('<div title="SVG Editor" id="dialog_svgEditor"><iframe src="/bms/libs/bmseditor/index.html" frameBorder="0" id="iframe_svgEditor"></iframe></div>')
-                    // Register socket in SVG editor
-                    $('iframe#iframe_svgEditor').load(function () {
-                        document.getElementById('iframe_svgEditor').contentWindow.methodDraw.socket = socket
-                    });
-                    $("body").append('<nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">' +
-                    '        <div class="container-fluid">' +
-                    '            <div class="navbar-header">' +
-                    '                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">' +
-                    '                    <span class="sr-only">Toggle navigation</span>' +
-                    '                    <span class="icon-bar"></span>' +
-                    '                    <span class="icon-bar"></span>' +
-                    '                    <span class="icon-bar"></span>' +
-                    '                </button>' +
-                    '                <a class="navbar-brand" href="#" id="bmotion-label">BMotion Studio</a>' +
-                    '            </div>' +
-                    '            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">' +
-                    '                <ul class="nav navbar-nav navbar-right" id="bmotion-navigation">' +
-                    '                    <li class="dropdown" id="bmotion-navigation-svg-dropdown">' +
-                    '                        <a href="#" id="bt_open_SvgEditor" class="dropdown-toggle" data-toggle="dropdown"> Edit SVG <span class="caret"></a>' +
-                    '                        <ul class="dropdown-menu" role="menu" id="bmotion-navigation-svg-ul">' +
-                    '                        </ul>' +
-                    '                    </li>' +
-                    '                    <li class="dropdown">' +
-                    '                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Model <span class="caret"></span></a>' +
-                    '                        <ul class="dropdown-menu" role="menu" id="bmotion-navigation-model">' +
-                    '                            <li><a id="bt_reloadModel" href="#"><i class="glyphicon glyphicon-refresh"></i> Reload</a></li>' +
-                    '                        </ul>' +
-                    '                    </li>' +
-                    '                </ul>' +
-                    '            </div>' +
-                    '        </div>' +
-                    '    </nav>')
-
-                    $("#dialog_svgEditor").dialog({
-                        dragStart: function (event, ui) {
-                            $("#iframe_svgEditor").hide();
-                        },
-                        dragStop: function (event, ui) {
-                            $("#iframe_svgEditor").show();
-                        },
-                        resize: function () {
-                            $("#iframe_svgEditor").hide();
-                        },
-                        resizeStart: function () {
-                            $("#iframe_svgEditor").hide();
-                        },
-                        resizeStop: function (ev, ui) {
-                            $("#iframe_svgEditor").show();
-                            fixSizeDialog($("#dialog_svgEditor"), $("#iframe_svgEditor"), 0, 0);
-                        },
-                        open: function (ev, ui) {
-                            fixSizeDialog($("#dialog_svgEditor"), $("#iframe_svgEditor"), 0, 0);
-                            $("#dialog_svgEditor").css('overflow', 'hidden'); //this line does the actual hiding
-                        },
-                        close: function (ev, ui) {
-                            /*var svgEditor = document.getElementById('iframe_svgEditor').contentWindow.methodDraw
-                             var svgCanvas = document.getElementById('iframe_svgEditor').contentWindow.svgCanvas
-                             var svg = {
-                             name: svgEditor.workingSvgFile,
-                             content: svgCanvas.getSvgString()
-                             };
-                             var replaceSvg = $(svg.content)
-                             replaceSvg.attr("data-svg", svg.name)
-                             $("svg[data-svg='" + svg.name + "']").replaceWith(replaceSvg)
-                             socket.emit('saveSvg', svg, function () {
-                             });*/
-                        },
-                        autoOpen: false,
-                        width: 900,
-                        height: 600
-                    });
-
-                    $("#bt_reloadModel").click(function () {
-                        $('#loadingModalText').html("Reloading model ...")
-                        $('#loadingModal').modal('show')
-                        socket.emit('reloadModel', function () {
-                            $('#loadingModal').modal('hide')
-                        });
-                    });
-                }
-
-                // Replace linked SVG files with content and add corresponding menu items
-
-                var hasSvg = false
-                $.each(data.bmsSvg, function (i, v) {
-                    var orgSvg = $("object[data='" + i + "']")
-                    var newSvg = $(v)
-                    newSvg.attr("data-svg", i)
-                    orgSvg.replaceWith(newSvg)
-                    hasSvg = true
-                    if (standalone)
-                        $("#bmotion-navigation-svg-ul").append('<li><a href="#" data-svg="' + i + '"><i class="glyphicon glyphicon-pencil"></i> ' + i + '</a></li>')
+        socket.on('checkObserver', function (trigger) {
+            if (observers[trigger] !== undefined) {
+                $.each(observers[trigger], function (i, v) {
+                    v.call(this)
                 });
-                if (!hasSvg) $("#bmotion-navigation-svg-dropdown").remove()
-
-                if (standalone) {
-                    // Open SVG Editor
-                    var svgAItems = $("#bmotion-navigation-svg-ul").find("a")
-                    svgAItems.click(function () {
-                        var svgFile = $(this).attr("data-svg")
-                        socket.emit('initSvgEditor', svgFile, function (svg) {
-                            $("#dialog_svgEditor").dialog("open");
-                            //$("#dialog_svgEditor").data("svgFile", svgFile)
-                            var svgEditor = document.getElementById('iframe_svgEditor').contentWindow.methodDraw
-                            svgEditor.workingSvgFile = svgFile
-                            svgEditor.loadFromString(svg)
-                        });
-                    })
-                }
-
-                socket.emit('initialisation');
-
-                $('#loadingModal').modal('hide')
-
-            });
+            }
         });
 
         socket.on('applyTransformers', function (data) {
@@ -218,11 +30,10 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
             }
         });
 
-        socket.on('checkObserver', function (trigger) {
-            $(document).trigger({
-                type: "checkObserver_" + trigger
-            });
-        });
+        var addObserver = function (cause, observer) {
+            if (observers[cause] === undefined) observers[cause] = [];
+            observers[cause].push(observer)
+        };
 
         // ---------------------
 
@@ -236,7 +47,7 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
                 origin !== undefined ? settings.callback.call(this, origin, data) : settings.callback.call(this, data)
             });
             return settings
-        }
+        };
 
         var callMethod = function (options, origin) {
             var settings = $.extend({
@@ -248,9 +59,29 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
                 origin !== undefined ? settings.callback.call(this, origin, data) : settings.callback.call(this, data)
             });
             return settings
-        }
+        };
 
-        var observe = function (options, origin) {
+        var observeMethod = function (options, origin) {
+
+            var settings = normalize($.extend({
+                selector: null,
+                name: "",
+                cause: "AnimationChanged",
+                trigger: function () {
+                }
+            }, options), ["trigger"], origin);
+            addObserver(settings.cause, function () {
+                socket.emit("callMethod", {data: settings}, function (data) {
+                    var el = settings.selector !== null ? $(settings.selector) : origin
+                    el !== undefined ? settings.trigger.call(this, el, data) : settings.trigger.call(this, data)
+                });
+            });
+            return settings
+
+        };
+
+        var observeFormulas = function (options, origin) {
+
             var settings = normalize($.extend({
                 selector: null,
                 formulas: [],
@@ -258,54 +89,50 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
                 trigger: function () {
                 }
             }, options), ["trigger"], origin);
-            $(document).bind("checkObserver_" + settings.cause, function () {
+            addObserver(settings.cause, function () {
                 socket.emit("observe", {data: settings}, function (data) {
                     var el = settings.selector !== null ? $(settings.selector) : origin
                     el !== undefined ? settings.trigger.call(this, el, data) : settings.trigger.call(this, data)
                 });
-            });
+            })
+
+            /*$(document).bind("checkObserver_" + settings.cause, function () {
+             socket.emit("observe", {data: settings}, function (data) {
+             var el = settings.selector !== null ? $(settings.selector) : origin
+             el !== undefined ? settings.trigger.call(this, el, data) : settings.trigger.call(this, data)
+             });
+             });*/
+
             return settings
-        }
 
-        var observeMethod = function (options, origin) {
-            var settings = normalize($.extend({
-                selector: null,
-                name: "",
-                cause: "AnimationChanged",
-                callback: function (data) {
-                }
-            }, options), ["callback"], origin);
-            $(document).bind("checkObserver_" + settings.cause, function () {
-                socket.emit("callMethod", {data: settings}, function (data) {
-                    var el = settings.selector !== null ? $(settings.selector) : origin
-                    el !== undefined ? settings.callback.call(this, el, data) : settings.callback.call(this, data)
-                });
-            });
-            return settings
-        }
-        // --------------------- Extend jQuery
-        $.fn.executeEvent = function (options) {
-            return this.click(function (e) {
-                executeEvent(options, e.target)
-            }).css('cursor', 'pointer')
-        }
+        };
 
-        $.fn.callMethod = function (options) {
-            return this.click(function (e) {
-                callMethod(options, e.target)
-            }).css('cursor', 'pointer')
-        }
+        var observe = function (what, options, origin) {
+            if (what === "formula") {
+                return observeFormulas(options, origin)
+            }
+            if (what === "method") {
+                return observeMethod(options, origin)
+            }
+        };
 
-        $.fn.observe = function (options) {
-            observe(options, this)
-            return this
-        }
-
-        $.fn.observeMethod = function (options) {
-            observeMethod(options, this)
-            return this
-        }
         // ---------------------
+        // jQuery extension
+        // ---------------------
+        (function ($) {
+
+            $.fn.observe = function (what, options) {
+                observe(what, options, this)
+                return this
+            }
+
+            $.fn.executeEvent = function (options) {
+                return this.click(function (e) {
+                    executeEvent(options, e.target)
+                }).css('cursor', 'pointer')
+            }
+
+        }(jQuery));
 
         // ---------------------
         // Return BMotion API functions
@@ -318,27 +145,18 @@ define(["css!jquery-ui-css", "css!jquery-ui-theme-css", "css!bootstrap-css", "cs
             executeEvent: function (options, origin) {
                 return executeEvent(options, origin)
             },
-            observe: function (options, origin) {
-                return observe(options, origin)
-            },
-            observeMethod: function (options, origin) {
-                return observeMethod(options, origin)
+            observe: function (what, options, origin) {
+                return observe(what, options, origin)
             }
         }
 
     }
-)
-
-function fixSizeDialog(dialog, obj, ox, oy) {
-    var newwidth = dialog.parent().width() - ox
-    var newheight = dialog.parent().height() - oy
-    obj.attr("style", "width:" + (newwidth) + "px;height:" + (newheight - 50) + "px");
-}
+);
 
 function normalize(obj, exclude, origin) {
-    exclude === 'undefined' ? [] : exclude
-    var obj2 = $.extend(true, {}, obj)
-    _normalize(obj2, exclude, origin)
+    exclude = exclude === 'undefined' ? [] : exclude;
+    var obj2 = $.extend(true, {}, obj);
+    _normalize(obj2, exclude, origin);
     return obj2
 }
 
@@ -350,7 +168,7 @@ function _normalize(obj, exclude, origin) {
             } else {
                 if ($.inArray(property, exclude) === -1) {
                     if (isFunction(obj[property])) {
-                        var r = origin !== undefined ? obj[property](origin) : obj[property]()
+                        var r = origin !== undefined ? obj[property](origin) : obj[property]();
                         obj[property] = r
                     }
                 }

@@ -45,6 +45,7 @@ public abstract class BMotion {
     }
 
     public void checkObserver(final String trigger) {
+        log.info "Check observer, trigger: " + trigger
         observers.get(trigger)?.observers?.each { it.apply(this) }
         clients.each { it.sendEvent("checkObserver", trigger) }
     }

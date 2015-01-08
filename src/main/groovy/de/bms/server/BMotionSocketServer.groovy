@@ -167,11 +167,11 @@ public class BMotionSocketServer {
                 File templateFile = new File(workspacePath + File.separator + url.getPath().replace("/bms/", ""))
                 BMotionSocketServer.log.debug "Template: " + templateFile
 
-                sessionConfiguration.bmsSvg.keySet().each {
+                /*sessionConfiguration.bmsSvg.keySet().each {
                     File svgFile = new File(templateFile.getParent() + File.separator + it)
                     sessionConfiguration.bmsSvg[it] = (svgFile.exists() ? svgFile.text :
                             '<svg width="325" height="430" xmlns="http://www.w3.org/2000/svg"></svg>')
-                }
+                }*/
                 def BMotion bmotion = sessions.get(url.getPath()) ?: null
                 if (bmotion == null) {
                     bmotion = createSession(sessionConfiguration.tool, templateFile, visualisationProvider)
