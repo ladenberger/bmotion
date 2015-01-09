@@ -59,8 +59,17 @@ define(['bms', 'angular-route', "bootstrap", "css!bootstrap-css"], function (bms
                         }
                     },
                     link: function ($scope, element, attrs) {
+
                         var loadingModal1 = angular.element('<bms-loading-modal></bms-loading-modal>')
                         element.find("body").append($compile(loadingModal1)($scope))
+
+                        $scope.modal.show()
+                        $scope.modal.setLabel("Loading visualisation ...")
+
+                        initSession.then(function (standalone) {
+                            $scope.modal.hide()
+                        })
+
                     }
                 }
             }])
