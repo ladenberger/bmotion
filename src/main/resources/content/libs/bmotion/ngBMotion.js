@@ -35,7 +35,7 @@ define(['bms', 'angular-route', "bootstrap", "css!bootstrap-css"], function (bms
                 };
                 ws.emit('initSession', event, function (data) {
                     defer.resolve(data.standalone)
-                })
+                });
                 return defer.promise;
             }])
             .run(['$rootScope', 'initSession', function ($rootScope, initSession) {
@@ -60,13 +60,13 @@ define(['bms', 'angular-route', "bootstrap", "css!bootstrap-css"], function (bms
                     },
                     link: function ($scope, element, attrs) {
 
-                        var loadingModal1 = angular.element('<bms-loading-modal></bms-loading-modal>')
-                        element.find("body").append($compile(loadingModal1)($scope))
+                        var loadingModal1 = angular.element('<bms-loading-modal></bms-loading-modal>');
+                        element.find("body").append($compile(loadingModal1)($scope));
 
-                        $scope.modal.show()
-                        $scope.modal.setLabel("Loading visualisation ...")
+                        $scope.modal.show();
+                        $scope.modal.setLabel("Loading visualisation ...");
 
-                        initSession.then(function (standalone) {
+                        initSession.then(function () {
                             $scope.modal.hide()
                         })
 

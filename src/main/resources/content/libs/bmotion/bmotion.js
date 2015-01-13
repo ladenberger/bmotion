@@ -139,18 +139,10 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
         // ---------------------
         return {
             socket: socket,
-            callMethod: function (options, origin) {
-                return callMethod(options, origin)
-            },
-            executeEvent: function (options, origin) {
-                return executeEvent(options, origin)
-            },
-            observe: function (what, options, origin) {
-                return observe(what, options, origin)
-            },
-            addObserver: function (cause, observer) {
-                addObserver(cause, observer);
-            }
+            callMethod: callMethod,
+            executeEvent: executeEvent,
+            observe: observe,
+            addObserver: addObserver
         }
 
     }
