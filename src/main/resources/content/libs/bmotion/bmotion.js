@@ -16,15 +16,15 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
         });
 
         socket.on('applyTransformers', function (data) {
-            var d1 = JSON.parse(data)
-            var i1 = 0
+            var d1 = JSON.parse(data);
+            var i1 = 0;
             for (; i1 < d1.length; i1++) {
-                var t = d1[i1]
+                var t = d1[i1];
                 if (t.selector) {
-                    var selector = $(t.selector)
-                    var content = t.content
-                    if (content != undefined) selector.html(content)
-                    selector.attr(t.attributes)
+                    var selector = $(t.selector);
+                    var content = t.content;
+                    if (content != undefined) selector.html(content);
+                    selector.attr(t.attributes);
                     selector.css(t.styles)
                 }
             }
@@ -38,11 +38,11 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
         // ---------------------
 
         var executeEvent = function (options, origin) {
-            var settings = $.extend({
+            var settings = normalize($.extend({
                 events: [],
                 callback: function () {
                 }
-            }, options);
+            }, options), ["callback"], origin);
             socket.emit("executeEvent", {data: normalize(settings, ["callback"], origin)}, function (data) {
                 origin !== undefined ? settings.callback.call(this, origin, data) : settings.callback.call(this, data)
             });
@@ -50,11 +50,11 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
         };
 
         var callMethod = function (options, origin) {
-            var settings = $.extend({
+            var settings = normalize($.extend({
                 name: "",
                 callback: function () {
                 }
-            }, options);
+            }, options), ["callback"], origin);
             socket.emit("callMethod", {data: normalize(settings, ["callback"], origin)}, function (data) {
                 origin !== undefined ? settings.callback.call(this, origin, data) : settings.callback.call(this, data)
             });
@@ -98,12 +98,6 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
                     }
                 });
             });
-            /*$(document).bind("checkObserver_" + settings.cause, function () {
-             socket.emit("observe", {data: settings}, function (data) {
-             var el = settings.selector !== null ? $(settings.selector) : origin
-             el !== undefined ? settings.trigger.call(this, el, data) : settings.trigger.call(this, data)
-             });
-             });*/
             return settings
         };
 
@@ -122,7 +116,7 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
         (function ($) {
 
             $.fn.observe = function (what, options) {
-                observe(what, options, this)
+                observe(what, options, this);
                 return this
             }
 
