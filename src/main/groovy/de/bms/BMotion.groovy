@@ -80,6 +80,13 @@ public abstract class BMotion {
 
     public abstract Object executeEvent(final data) throws ImpossibleStepException
 
+    public Object observe(final d) {
+        def formulas = d.data.formulas
+        return formulas.collect {
+            eval(it)
+        }
+    }
+
     /**
      *
      * This method evaluates a given formula and returns the result.

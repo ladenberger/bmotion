@@ -34,15 +34,11 @@ public class BMotionSocketServer {
         server.addDisconnectListener(new DisconnectListener() {
             @Override
             public void onDisconnect(SocketIOClient client) {
-
-                String path = clients.get(client)
-                clients.remove(client)
-                def BMotion bmotion = sessions.get(path) ?: null
+                def BMotion bmotion = getSession(client)
                 if (bmotion != null) {
                     bmotion.clients.remove(client)
                     BMotionSocketServer.log.info "Removed client " + client.sessionId + " from BMotion session " + bmotion.sessionId
                 }
-
             }
         });
 
@@ -52,8 +48,7 @@ public class BMotionSocketServer {
                     @Override
                     public void onData(final SocketIOClient client, JsonObject d,
                                        final AckRequest ackRequest) {
-                        String path = clients.get(client)
-                        def BMotion bmotion = sessions.get(path) ?: null
+                        def BMotion bmotion = getSession(client)
                         if (bmotion != null) {
                             Object returnValue = bmotion.callGroovyMethod(d.data.name, d)
                             if (ackRequest.isAckRequested()) {
@@ -68,8 +63,7 @@ public class BMotionSocketServer {
                     @Override
                     public void onData(final SocketIOClient client, JsonObject d,
                                        final AckRequest ackRequest) {
-                        String path = clients.get(client)
-                        def BMotion bmotion = sessions.get(path) ?: null
+                        def BMotion bmotion = getSession(client)
                         if (bmotion != null) {
                             def returnValue = bmotion.executeEvent(d.data)
                             if (ackRequest.isAckRequested()) {
@@ -83,13 +77,9 @@ public class BMotionSocketServer {
                     @Override
                     public void onData(final SocketIOClient client, JsonObject d,
                                        final AckRequest ackRequest) {
-                        String path = clients.get(client)
-                        def BMotion bmotion = sessions.get(path) ?: null
+                        def BMotion bmotion = getSession(client)
                         if (bmotion != null) {
-                            def formulas = d.data.formulas
-                            def returnValue = formulas.collect {
-                                bmotion.eval(it)
-                            }
+                            def returnValue = bmotion.observe(d)
                             if (ackRequest.isAckRequested()) {
                                 ackRequest.sendAckData([values: returnValue]);
                             }
@@ -97,63 +87,27 @@ public class BMotionSocketServer {
                     }
                 });
 
+        server.addEventListener("eval", JsonObject.class, new DataListener<JsonObject>() {
+            @Override
+            public void onData(final SocketIOClient client, JsonObject d,
+                               final AckRequest ackRequest) {
+                def BMotion bmotion = getSession(client)
+                if (bmotion != null) {
+                    if (ackRequest.isAckRequested()) {
+                        ackRequest.sendAckData([bmotion.eval(d.data.formula)]);
+                    }
+                }
+            }
+        });
+
         server.addEventListener("reloadModel", String.class,
                 new DataListener<String>() {
                     @Override
                     public void onData(final SocketIOClient client, String s,
                                        final AckRequest ackRequest) {
-                        String path = clients.get(client)
-                        def BMotion bmotion = sessions.get(path) ?: null
+                        def BMotion bmotion = getSession(client)
                         if (bmotion != null) {
                             bmotion.reloadModel()
-                        }
-                    }
-                });
-
-        server.addEventListener("initSvgEditor", String.class,
-                new DataListener<String>() {
-                    @Override
-                    public void onData(final SocketIOClient client, String svgFile,
-                                       final AckRequest ackRequest) {
-                        String path = clients.get(client)
-                        def BMotion bmotion = sessions.get(path) ?: null
-                        if (bmotion != null) {
-                            def svg = bmotion.sessionConfiguration.bmsSvg
-                            if (svg && ackRequest.isAckRequested()) {
-                                ackRequest.sendAckData(svg.get(svgFile));
-                            }
-                        }
-                    }
-                });
-
-        server.addEventListener("initialisation", String.class,
-                new DataListener<String>() {
-                    @Override
-                    public void onData(final SocketIOClient client, String d,
-                                       final AckRequest ackRequest) {
-                        String path = clients.get(client)
-                        def BMotion bmotion = sessions.get(path) ?: null
-                        if (bmotion != null) {
-                            client.sendEvent("initialisation", bmotion.sessionConfiguration)
-                            client.sendEvent("initSvg")
-                            bmotion.refresh()
-                        }
-                    }
-                });
-
-        server.addEventListener("saveSvg", SvgEditorContent.class,
-                new DataListener<SvgEditorContent>() {
-                    @Override
-                    public void onData(final SocketIOClient client, SvgEditorContent svg,
-                                       final AckRequest ackRequest) {
-                        client.sendEvent("initSvg")
-                        String path = clients.get(client)
-                        def BMotion bmotion = sessions.get(path) ?: null
-                        if (bmotion != null) {
-                            File svgFile = new File(bmotion.getTemplateFolder() + File.separator + svg.name)
-                            svgFile.write(svg.content)
-                            bmotion.sessionConfiguration.bmsSvg.put(svg.name, svg.content)
-                            bmotion.refresh()
                         }
                     }
                 });
@@ -166,12 +120,6 @@ public class BMotionSocketServer {
                 URL url = new URL(sessionConfiguration.templateUrl)
                 File templateFile = new File(workspacePath + File.separator + url.getPath().replace("/bms/", ""))
                 BMotionSocketServer.log.debug "Template: " + templateFile
-
-                /*sessionConfiguration.bmsSvg.keySet().each {
-                    File svgFile = new File(templateFile.getParent() + File.separator + it)
-                    sessionConfiguration.bmsSvg[it] = (svgFile.exists() ? svgFile.text :
-                            '<svg width="325" height="430" xmlns="http://www.w3.org/2000/svg"></svg>')
-                }*/
                 def BMotion bmotion = sessions.get(url.getPath()) ?: null
                 if (bmotion == null) {
                     bmotion = createSession(sessionConfiguration.tool, templateFile, visualisationProvider)
@@ -188,9 +136,10 @@ public class BMotionSocketServer {
                 BMotionSocketServer.log.info "Refresh BMotion session " + bmotion.sessionId
                 // Send content of linked SVG files to client
                 if (ackRequest.isAckRequested()) {
-                    def data = [bmsSvg: bmotion.sessionConfiguration.bmsSvg, standalone: standalone]
+                    def data = [standalone: standalone]
                     ackRequest.sendAckData(data)
                 }
+                bmotion.refresh()
 
             }
         });
@@ -221,6 +170,11 @@ public class BMotionSocketServer {
             }
         }).start();
 
+    }
+
+    public BMotion getSession(SocketIOClient client) {
+        String path = clients.get(client)
+        return sessions.get(path) ?: null
     }
 
     private BMotion createSession(String type, File templateFile, BMotionVisualisationProvider visualisationProvider) {
