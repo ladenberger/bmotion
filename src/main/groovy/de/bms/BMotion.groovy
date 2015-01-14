@@ -99,18 +99,6 @@ public abstract class BMotion {
      */
     public abstract Object eval(final String formula) throws IllegalFormulaException
 
-    /*public Object executeOperation(final Map<String, String[]> params) {
-        String id = (params.get("id") != null && params.get("id").length > 0) ? params.get("id")[0] : "";
-        String op = params.get("op")[0];
-        String[] parameters = params.get("predicate");
-        try {
-            getTool().doStep(id, op, parameters);
-        } catch (ImpossibleStepException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }*/
-
     public void registerMethod(String name, Closure cls) {
         methods.put(name, cls)
     }
