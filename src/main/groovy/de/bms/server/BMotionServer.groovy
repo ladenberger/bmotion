@@ -2,6 +2,7 @@ package de.bms.server
 
 import com.google.common.io.Resources
 import de.bms.BMotionVisualisationProvider
+import de.bms.DesktopApi
 import groovy.util.logging.Slf4j
 import org.apache.commons.cli.*
 import org.eclipse.jetty.server.Connector
@@ -33,6 +34,8 @@ public class BMotionServer {
     def String host = "localhost"
     def String socketHost = "localhost"
 
+    def String visualisation = ""
+
     public BMotionServer(String[] args, BMotionVisualisationProvider visualisationProvider) {
 
         Options options = new Options()
@@ -46,6 +49,8 @@ public class BMotionServer {
                 .withDescription("Socket Host").create("socketHost"))
         options.addOption(OptionBuilder.withArgName("socketPort").hasArg()
                 .withDescription("Socket Port").create("socketPort"))
+        options.addOption(OptionBuilder.withArgName("visualisation").hasArg()
+                .withDescription("Open specific visualisation").create("visualisation"))
         options.addOption(new Option("standalone", "Run in standalone mode"));
 
         CommandLineParser parser = new BasicParser()
@@ -59,7 +64,6 @@ public class BMotionServer {
         if (line.hasOption("port")) {
             this.port = Integer.parseInt(line.getOptionValue("port"))
         }
-
         if (line.hasOption("socketHost")) {
             this.socketHost = line.getOptionValue("socketHost")
         }
@@ -68,6 +72,9 @@ public class BMotionServer {
         }
         if (line.hasOption("standalone")) {
             this.standalone = true
+        }
+        if (line.hasOption("visualisation")) {
+            this.visualisation = line.getOptionValue("visualisation")
         }
 
         // Create socket server
@@ -82,6 +89,7 @@ public class BMotionServer {
     public void start() {
         startBMotionSocketServer()
         startBMotionJettyServer()
+        openBrowser()
     }
 
     private startBMotionJettyServer() {
@@ -136,6 +144,11 @@ public class BMotionServer {
 
     public String getHost() {
         return host
+    }
+
+    public void openBrowser() {
+        java.net.URI uri = new java.net.URI("http://" + host + ":" + port + "/bms/" + visualisation)
+        DesktopApi.browse(uri)
     }
 
 }
