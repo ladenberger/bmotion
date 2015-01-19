@@ -132,6 +132,7 @@ define(['bms', 'angular-route', "bootstrap", "css!bootstrap-css"], function (bms
             })
             .directive('bmsVisualisation', ['$compile', function ($compile) {
                 return {
+
                     //restrict: 'E',
                     //replace: true,
                     controller: function ($scope) {
@@ -141,7 +142,7 @@ define(['bms', 'angular-route', "bootstrap", "css!bootstrap-css"], function (bms
                         $scope.mapping = [];
                         $scope.order = [];
                         $scope.getValue = function (bmsid, attr, defaultValue) {
-                            var returnValue = defaultValue === "undefined" ? undefined : defaultValue;
+                            var returnValue = defaultValue === 'undefined' ? undefined : defaultValue;
                             if ($scope.values !== undefined) {
                                 if ($scope.mapping[bmsid] !== undefined) {
                                     var lastIndex;
@@ -161,7 +162,7 @@ define(['bms', 'angular-route', "bootstrap", "css!bootstrap-css"], function (bms
                         };
                         $scope.setOrder = function (order) {
                             $scope.order = order.reverse()
-                        }
+                        };
                     },
                     link: function (scope, element) {
                         scope.$watch('values', function (newValue, oldValue) {
@@ -173,13 +174,22 @@ define(['bms', 'angular-route', "bootstrap", "css!bootstrap-css"], function (bms
                                     $.each(attrs, function (attr, val) {
                                         orgElement.each(function () {
                                             var attrDefault = $(this).attr(attr);
+                                            // Special case for class attributes
+                                            if (attr === "class" && attrDefault === undefined) {
+                                                attrDefault = ""
+                                            }
+                                            // Set internal bms id
                                             if (!$(this).attr("data-bms")) {
                                                 $(this).attr("data-bms", "bms" + scope.count);
                                                 scope.count++;
                                             }
-                                            if (scope.mapping[$(this).attr("data-bms")] === undefined)
+                                            // Create mapping object, if not exists yet
+                                            if (scope.mapping[$(this).attr("data-bms")] === undefined) {
                                                 scope.mapping[$(this).attr("data-bms")] = [];
+                                            }
+                                            // Add selector to internal bms id map
                                             scope.mapping[$(this).attr("data-bms")].push(selector);
+                                            // Initialise the getValue method
                                             $(this).attr("ng-attr-" + attr,
                                                 "{{getValue('" + $(this).attr("data-bms") + "','" + attr + "','" + attrDefault + "')}}")
                                         });
