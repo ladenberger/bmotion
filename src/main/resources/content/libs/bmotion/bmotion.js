@@ -6,13 +6,24 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
         var socket = io.connect('http://localhost:9090');
 
         var observers = {};
+        var formulaObservers = {};
 
         socket.on('checkObserver', function (trigger) {
+
             if (observers[trigger] !== undefined) {
                 $.each(observers[trigger], function (i, v) {
                     v.call(this)
                 });
             }
+
+            if (formulaObservers[trigger] !== undefined) {
+                socket.emit("observe", {data: formulaObservers[trigger]}, function (data) {
+                    $.each(formulaObservers[trigger], function (i, v) {
+                        v.observer.call(this, {values: data[i]})
+                    });
+                });
+            }
+
         });
 
         socket.on('applyTransformers', function (data) {
@@ -34,6 +45,25 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
             if (observers[cause] === undefined) observers[cause] = [];
             observers[cause].push(observer)
         };
+
+        var addFormulaObserver = function (cause, settings, observer) {
+            if (formulaObservers[cause] === undefined) formulaObservers[cause] = {};
+            settings.observer = observer
+            formulaObservers[cause][guid()] = settings
+        };
+
+        var guid = (function () {
+            function s4() {
+                return Math.floor((1 + Math.random()) * 0x10000)
+                    .toString(16)
+                    .substring(1);
+            }
+
+            return function () {
+                return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+                    s4() + '-' + s4() + s4() + s4();
+            };
+        })();
 
         // ---------------------
 
@@ -79,6 +109,7 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
         };
 
         var observeFormulas = function (options, origin) {
+
             var settings = normalize($.extend({
                 selector: null,
                 formulas: [],
@@ -86,19 +117,18 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
                 trigger: function () {
                 }
             }, options), ["trigger"], origin);
-            addObserver(settings.cause, function () {
-                socket.emit("observe", {data: settings}, function (data) {
-                    if (origin === undefined) {
-                        settings.trigger.call(this, data)
-                    } else {
-                        var el = settings.selector !== null ? $(settings.selector) : origin;
-                        el.each(function (i, v) {
-                            settings.trigger.call(this, $(v), data)
-                        });
-                    }
-                });
+            addFormulaObserver(settings.cause, settings, function (data) {
+                if (origin === undefined) {
+                    settings.trigger.call(this, data)
+                } else {
+                    var el = settings.selector !== null ? $(settings.selector) : origin;
+                    el.each(function (i, v) {
+                        settings.trigger.call(this, $(v), data)
+                    });
+                }
             });
             return settings
+
         };
 
         var observe = function (what, options, origin) {
@@ -118,7 +148,7 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
             $.fn.observe = function (what, options) {
                 observe(what, options, this);
                 return this
-            }
+            };
 
             $.fn.executeEvent = function (options) {
                 return this.click(function (e) {

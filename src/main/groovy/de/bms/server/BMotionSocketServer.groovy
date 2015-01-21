@@ -72,6 +72,7 @@ public class BMotionSocketServer {
                         }
                     }
                 });
+
         server.addEventListener("observe", JsonObject.class,
                 new DataListener<JsonObject>() {
                     @Override
@@ -79,9 +80,8 @@ public class BMotionSocketServer {
                                        final AckRequest ackRequest) {
                         def BMotion bmotion = getSession(client)
                         if (bmotion != null) {
-                            def returnValue = bmotion.observe(d)
                             if (ackRequest.isAckRequested()) {
-                                ackRequest.sendAckData([values: returnValue]);
+                                ackRequest.sendAckData(bmotion.observe(d));
                             }
                         }
                     }
@@ -140,6 +140,7 @@ public class BMotionSocketServer {
                     ackRequest.sendAckData(data)
                 }
                 bmotion.refresh()
+                client.sendEvent("initialised")
 
             }
         });
