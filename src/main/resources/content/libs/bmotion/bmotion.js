@@ -19,7 +19,7 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
             if (formulaObservers[trigger] !== undefined) {
                 socket.emit("observe", {data: formulaObservers[trigger]}, function (data) {
                     $.each(formulaObservers[trigger], function (i, v) {
-                        v.observer.call(this, {values: data[i]})
+                        v.observer.call(this, data[i])
                     });
                 });
             }
@@ -93,7 +93,6 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
 
         var observeMethod = function (options, origin) {
             var settings = normalize($.extend({
-                selector: null,
                 name: "",
                 cause: "AnimationChanged",
                 trigger: function () {
@@ -101,34 +100,22 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
             }, options), ["trigger"], origin);
             addObserver(settings.cause, function () {
                 socket.emit("callMethod", {data: settings}, function (data) {
-                    var el = settings.selector !== null ? $(settings.selector) : origin;
-                    el !== undefined ? settings.trigger.call(this, el, data) : settings.trigger.call(this, data)
+                    origin !== undefined ? settings.trigger.call(this, $(origin), data) : settings.trigger.call(this, data)
                 });
             });
             return settings
         };
 
         var observeFormulas = function (options, origin) {
-
             var settings = normalize($.extend({
-                selector: null,
                 formulas: [],
                 cause: "AnimationChanged",
                 trigger: function () {
                 }
             }, options), ["trigger"], origin);
             addFormulaObserver(settings.cause, settings, function (data) {
-                if (origin === undefined) {
-                    settings.trigger.call(this, data)
-                } else {
-                    var el = settings.selector !== null ? $(settings.selector) : origin;
-                    el.each(function (i, v) {
-                        settings.trigger.call(this, $(v), data)
-                    });
-                }
+                origin !== undefined ? settings.trigger.call(this, $(origin), data) : settings.trigger.call(this, data)
             });
-            return settings
-
         };
 
         var observe = function (what, options, origin) {
@@ -146,7 +133,9 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
         (function ($) {
 
             $.fn.observe = function (what, options) {
-                observe(what, options, this);
+                this.each(function (i, v) {
+                    observe(what, options, v);
+                });
                 return this
             };
 
@@ -187,7 +176,7 @@ function _normalize(obj, exclude, origin) {
             } else {
                 if ($.inArray(property, exclude) === -1) {
                     if (isFunction(obj[property])) {
-                        var r = origin !== undefined ? obj[property](origin) : obj[property]();
+                        var r = origin !== undefined ? obj[property]($(origin)) : obj[property]();
                         obj[property] = r
                     }
                 }
