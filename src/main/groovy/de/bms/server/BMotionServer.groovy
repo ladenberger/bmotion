@@ -52,11 +52,15 @@ public class BMotionServer {
         options.addOption(OptionBuilder.withArgName("visualisation").hasArg()
                 .withDescription("Open specific visualisation").create("visualisation"))
         options.addOption(new Option("standalone", "Run in standalone mode"));
+        options.addOption(new Option("local", "Run on localhost"));
 
         CommandLineParser parser = new BasicParser()
         CommandLine line = parser.parse(options, args);
         if (line.hasOption("workspace")) {
             this.workspacePath = line.getOptionValue("workspace");
+        }
+        if (line.hasOption("local")) {
+            this.host = "localhost"
         }
         if (line.hasOption("host")) {
             this.host = line.getOptionValue("host")
