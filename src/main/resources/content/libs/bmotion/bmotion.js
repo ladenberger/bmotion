@@ -3,7 +3,7 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
         // ---------------------
         // Establish client socket
         // ---------------------
-        var socket = io.connect("http://0.0.0.0:9090");
+        var socket = io.connect(document.location.protocol + '//' + document.location.hostname + ':9090');
 
         var observers = {};
         var formulaObservers = {};
