@@ -22,7 +22,7 @@ public class BMotionSocketServer {
                                BMotionVisualisationProvider visualisationProvider) {
 
         def config = new Configuration()
-        config.setHostname("localhost")
+        //config.setHostname("localhost")
         config.setPort(9090)
         server = new SocketIOServer(config)
 
@@ -155,7 +155,7 @@ public class BMotionSocketServer {
                 while (!found && port < 9180) {
                     try {
                         found = true;
-                        server.getConfiguration().setHostname(host)
+                        //server.getConfiguration().setHostname(host)
                         server.getConfiguration().setPort(port)
                         server.start();
                         log.info "Socket.io started on host " + host + " and port " + port

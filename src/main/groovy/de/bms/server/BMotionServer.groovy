@@ -31,8 +31,8 @@ public class BMotionServer {
     def int port = 8080
     def int socketPort = 9090
 
-    def String host = "localhost"
-    def String socketHost = "localhost"
+    def String host = "0.0.0.0"
+    def String socketHost = "0.0.0.0"
 
     def String visualisation = ""
 
