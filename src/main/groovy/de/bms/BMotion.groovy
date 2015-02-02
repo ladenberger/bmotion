@@ -180,10 +180,6 @@ public abstract class BMotion {
         initModel(sessionConfiguration?.modelPath, true)
     }
 
-    public void reloadGrooyScript() {
-        initGroovyScript(sessionConfiguration?.scriptPath)
-    }
-
     public String getTemplateFolder() {
         return new File(templatePath).getParent()
     }

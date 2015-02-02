@@ -119,7 +119,7 @@ public class BMotionSocketServer {
 
                 URL url = new URL(sessionConfiguration.templateUrl)
                 File templateFile = new File(workspacePath + File.separator + url.getPath().replace("/bms/", ""))
-                BMotionSocketServer.log.debug "Template: " + templateFile
+                BMotionSocketServer.log.debug "Template to be loaded: " + templateFile
                 def BMotion bmotion = sessions.get(url.getPath()) ?: null
                 if (bmotion == null) {
                     bmotion = createSession(sessionConfiguration.tool, templateFile, visualisationProvider)
@@ -132,13 +132,13 @@ public class BMotionSocketServer {
                 // Bound client to current visualisation
                 clients.put(client, url.getPath())
                 // Initialise session
+                BMotionSocketServer.log.info "Initialise BMotion session " + bmotion.sessionId
                 bmotion.initSession(sessionConfiguration)
-                BMotionSocketServer.log.info "Refresh BMotion session " + bmotion.sessionId
-                // Send content of linked SVG files to client
                 if (ackRequest.isAckRequested()) {
                     def data = [standalone: standalone]
                     ackRequest.sendAckData(data)
                 }
+                BMotionSocketServer.log.info "Refresh BMotion session " + bmotion.sessionId
                 bmotion.refresh()
                 client.sendEvent("initialised")
 
