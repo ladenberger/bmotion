@@ -1,9 +1,6 @@
 package de.bms.server
 
-import com.corundumstudio.socketio.AckRequest
-import com.corundumstudio.socketio.Configuration
-import com.corundumstudio.socketio.SocketIOClient
-import com.corundumstudio.socketio.SocketIOServer
+import com.corundumstudio.socketio.*
 import com.corundumstudio.socketio.listener.ConnectListener
 import com.corundumstudio.socketio.listener.DataListener
 import com.corundumstudio.socketio.listener.DisconnectListener
@@ -22,8 +19,11 @@ public class BMotionSocketServer {
                                BMotionVisualisationProvider visualisationProvider) {
 
         def config = new Configuration()
+        def socketConfig = new SocketConfig()
+        socketConfig.setReuseAddress(true)
         //config.setHostname("localhost")
         config.setPort(9090)
+        config.setSocketConfig(socketConfig)
         server = new SocketIOServer(config)
 
         server.addConnectListener(new ConnectListener() {
@@ -119,7 +119,7 @@ public class BMotionSocketServer {
 
                 URL url = new URL(sessionConfiguration.templateUrl)
                 File templateFile = new File(workspacePath + File.separator + url.getPath().replace("/bms/", ""))
-                BMotionSocketServer.log.debug "Template to be loaded: " + templateFile
+                BMotionSocketServer.log.debug "Template: " + templateFile
                 def BMotion bmotion = sessions.get(url.getPath()) ?: null
                 if (bmotion == null) {
                     bmotion = createSession(sessionConfiguration.tool, templateFile, visualisationProvider)
@@ -132,13 +132,13 @@ public class BMotionSocketServer {
                 // Bound client to current visualisation
                 clients.put(client, url.getPath())
                 // Initialise session
-                BMotionSocketServer.log.info "Initialise BMotion session " + bmotion.sessionId
                 bmotion.initSession(sessionConfiguration)
+                BMotionSocketServer.log.info "Refresh BMotion session " + bmotion.sessionId
+                // Send content of linked SVG files to client
                 if (ackRequest.isAckRequested()) {
                     def data = [standalone: standalone]
                     ackRequest.sendAckData(data)
                 }
-                BMotionSocketServer.log.info "Refresh BMotion session " + bmotion.sessionId
                 bmotion.refresh()
                 client.sendEvent("initialised")
 
@@ -154,11 +154,11 @@ public class BMotionSocketServer {
                 boolean found = false
                 while (!found && port < 9180) {
                     try {
-                        found = true;
                         //server.getConfiguration().setHostname(host)
                         server.getConfiguration().setPort(port)
                         server.start();
                         log.info "Socket.io started on host " + host + " and port " + port
+                        found = true;
                         Thread.sleep(Integer.MAX_VALUE);
                         server.stop();
                     } catch (BindException ex) {
