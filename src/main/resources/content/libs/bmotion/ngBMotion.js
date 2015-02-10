@@ -19,6 +19,12 @@ define(['bms', 'angular-route', "bootstrap", "css!bootstrap-css"], function (bms
         };
 
         return angular.module('bmsModule', ['ngRoute'])
+            .run(function ($rootScope) {
+                $rootScope.formulaElements = [];
+                $rootScope.addFormulaElement = function (element) {
+                    $rootScope.formulaElements.push({value: $rootScope.formulaElements.length + 1, text: element})
+                };
+            })
             .factory('ws', ['$rootScope', function ($rootScope) {
                 'use strict';
                 return {

@@ -114,9 +114,19 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
                 }
             }, options), ["trigger"], origin);
             if (origin !== undefined) {
+
+                var $body = angular.element(document.body);   // 1
+                var $rootScope = $body.scope().$root;         // 2
+                $rootScope.$apply(function () {               // 3
+                    var id = $(origin).attr("id");
+                    if (id !== undefined) {
+                        $rootScope.addFormulaElement("#" + id);
+                    }
+                });
                 $(origin).on("trigger", function (event, data) {
                     settings.trigger.call(this, $(this), data)
                 });
+
             }
             addFormulaObserver(settings.cause, settings, function (data) {
                 origin !== undefined ? settings.trigger.call(this, $(origin), data) : settings.trigger.call(this, data)
