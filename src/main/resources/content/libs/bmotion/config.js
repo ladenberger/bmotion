@@ -22,7 +22,7 @@ require.config({
         'angularAMD': ["angular"],
         'angular-route': ["angular"],
         'socketio': {'exports': 'io'},
-        'ngBMotion': ["bms", "socketio", "bootstrap", "jquery-cookie"],
+        'ngBMotion': ["bms", "socketio", "bootstrap"],
         'bootstrap': ["jquery"],
         'bms': {'exports': 'bms'}
     }

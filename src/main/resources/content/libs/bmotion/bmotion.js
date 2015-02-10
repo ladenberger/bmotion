@@ -48,7 +48,7 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
 
         var addFormulaObserver = function (cause, settings, observer) {
             if (formulaObservers[cause] === undefined) formulaObservers[cause] = {};
-            settings.observer = observer
+            settings.observer = observer;
             formulaObservers[cause][guid()] = settings
         };
 
@@ -113,6 +113,11 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
                 trigger: function () {
                 }
             }, options), ["trigger"], origin);
+            if (origin !== undefined) {
+                $(origin).on("trigger", function (event, data) {
+                    settings.trigger.call(this, $(this), data)
+                });
+            }
             addFormulaObserver(settings.cause, settings, function (data) {
                 origin !== undefined ? settings.trigger.call(this, $(origin), data) : settings.trigger.call(this, data)
             });
@@ -171,13 +176,16 @@ function normalize(obj, exclude, origin) {
 function _normalize(obj, exclude, origin) {
     for (var property in obj) {
         if (obj.hasOwnProperty(property)) {
+            if (origin !== undefined) {
+                $(origin).data(property, obj[property]);
+            }
             if (typeof obj[property] == "object") {
                 _normalize(obj[property], exclude, origin);
             } else {
                 if ($.inArray(property, exclude) === -1) {
                     if (isFunction(obj[property])) {
                         var r = origin !== undefined ? obj[property]($(origin)) : obj[property]();
-                        obj[property] = r
+                        obj[property] = r;
                     }
                 }
             }
