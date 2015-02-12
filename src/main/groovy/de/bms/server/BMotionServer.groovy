@@ -1,6 +1,7 @@
 package de.bms.server
 
 import com.google.common.io.Resources
+import de.bms.BMotionSocketListenerProvider
 import de.bms.BMotionVisualisationProvider
 import de.bms.DesktopApi
 import groovy.util.logging.Slf4j
@@ -20,6 +21,8 @@ public class BMotionServer {
 
     private BMotionVisualisationProvider visualisationProvider
 
+    private BMotionSocketListenerProvider socketListenerProvider
+
     private URL[] resourcePaths
 
     def BMotionSocketServer socketServer
@@ -36,7 +39,7 @@ public class BMotionServer {
 
     def String visualisation = ""
 
-    public BMotionServer(String[] args, BMotionVisualisationProvider visualisationProvider) {
+    public BMotionServer(String[] args) {
 
         Options options = new Options()
         options.addOption(OptionBuilder.withArgName("workspace").hasArg()
@@ -80,9 +83,6 @@ public class BMotionServer {
         if (line.hasOption("visualisation")) {
             this.visualisation = line.getOptionValue("visualisation")
         }
-
-        // Create socket server
-        socketServer = new BMotionSocketServer(standalone, workspacePath, visualisationProvider)
 
     }
 
@@ -139,6 +139,8 @@ public class BMotionServer {
     }
 
     private void startBMotionSocketServer() {
+        // Create socket server
+        socketServer = new BMotionSocketServer(standalone, workspacePath, visualisationProvider, socketListenerProvider)
         socketServer.start(socketHost, socketPort)
     }
 
@@ -153,6 +155,14 @@ public class BMotionServer {
     public void openBrowser() {
         java.net.URI uri = new java.net.URI("http://" + host + ":" + port + "/bms/" + visualisation)
         DesktopApi.browse(uri)
+    }
+
+    public void setSocketListenerProvider(BMotionSocketListenerProvider provider) {
+        this.socketListenerProvider = provider
+    }
+
+    public void setVisualisationProvider(BMotionVisualisationProvider provider) {
+        this.visualisationProvider = provider
     }
 
 }

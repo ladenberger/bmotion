@@ -5,6 +5,7 @@ import com.corundumstudio.socketio.listener.ConnectListener
 import com.corundumstudio.socketio.listener.DataListener
 import com.corundumstudio.socketio.listener.DisconnectListener
 import de.bms.BMotion
+import de.bms.BMotionSocketListenerProvider
 import de.bms.BMotionVisualisationProvider
 import groovy.util.logging.Slf4j
 
@@ -14,15 +15,27 @@ public class BMotionSocketServer {
     public final Map<String, BMotion> sessions = new HashMap<String, BMotion>();
     public final Map<SocketIOClient, String> clients = new HashMap<SocketIOClient, String>();
     def SocketIOServer server
+    def boolean standalone = true
+    def String workspacePath
+    def BMotionVisualisationProvider visualisationProvider
+    def BMotionSocketListenerProvider socketListenerProvider
 
     public BMotionSocketServer(boolean standalone, String workspacePath,
-                               BMotionVisualisationProvider visualisationProvider) {
+                               BMotionVisualisationProvider visualisationProvider,
+                               BMotionSocketListenerProvider socketListenerProvider) {
+        this.standalone = standalone
+        this.workspacePath = workspacePath
+        this.visualisationProvider = visualisationProvider
+        this.socketListenerProvider = socketListenerProvider
+    }
+
+    private SocketIOServer createSocketIOServer(int port) {
 
         def config = new Configuration()
         def socketConfig = new SocketConfig()
         socketConfig.setReuseAddress(true)
         //config.setHostname("localhost")
-        config.setPort(9090)
+        config.setPort(port)
         config.setSocketConfig(socketConfig)
         server = new SocketIOServer(config)
 
@@ -145,6 +158,10 @@ public class BMotionSocketServer {
             }
         });
 
+        socketListenerProvider?.installListeners(this)
+
+        return server;
+
     }
 
     public void start(String host, int port) {
@@ -154,9 +171,7 @@ public class BMotionSocketServer {
                 boolean found = false
                 while (!found && port < 9180) {
                     try {
-                        //server.getConfiguration().setHostname(host)
-                        server.getConfiguration().setPort(port)
-                        server.start();
+                        createSocketIOServer(port).start()
                         log.info "Socket.io started on host " + host + " and port " + port
                         found = true;
                         Thread.sleep(Integer.MAX_VALUE);
