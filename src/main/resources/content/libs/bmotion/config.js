@@ -27,3 +27,14 @@ require.config({
         'bms': {'exports': 'bms'}
     }
 });
+define(function () {
+
+    return {
+        socket: {
+            protocol: document.location.protocol,
+            host: document.location.hostname,
+            port: 9090
+        }
+    }
+
+});

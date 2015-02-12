@@ -1,9 +1,9 @@
-define(["jquery", "socketio", 'css!bmotion-css'], function () {
+define(["/bms/libs/bmotion/config.js", "jquery", "socketio", 'css!bmotion-css'], function (config) {
 
         // ---------------------
         // Establish client socket
         // ---------------------
-        var socket = io.connect(document.location.protocol + '//' + document.location.hostname + ':9090');
+        var socket = io.connect(config.socket.protocol + '//' + config.socket.host + ':' + config.socket.port);
 
         var observers = {};
         var formulaObservers = {};
@@ -114,19 +114,18 @@ define(["jquery", "socketio", 'css!bmotion-css'], function () {
                 }
             }, options), ["trigger"], origin);
             if (origin !== undefined) {
-
-                var $body = angular.element(document.body);   // 1
-                var $rootScope = $body.scope().$root;         // 2
-                $rootScope.$apply(function () {               // 3
-                    var id = $(origin).attr("id");
-                    if (id !== undefined) {
-                        $rootScope.addFormulaElement("#" + id);
-                    }
-                });
+                /*var $body = angular.element(document.body);
+                 console.log($body)
+                 var $rootScope = $body.scope().$root;
+                 $rootScope.$apply(function () {
+                 var id = $(origin).attr("id");
+                 if (id !== undefined) {
+                 $rootScope.addFormulaElement("#" + id);
+                 }
+                 });*/
                 $(origin).on("trigger", function (event, data) {
                     settings.trigger.call(this, $(this), data)
                 });
-
             }
             addFormulaObserver(settings.cause, settings, function (data) {
                 origin !== undefined ? settings.trigger.call(this, $(origin), data) : settings.trigger.call(this, data)
