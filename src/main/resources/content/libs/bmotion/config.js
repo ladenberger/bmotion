@@ -34,7 +34,10 @@ define(function () {
             protocol: document.location.protocol,
             host: document.location.hostname,
             port: 9090
-        }
+        },
+        model: "",
+        script: "",
+        tool: "BAnimation"
     }
 
 });

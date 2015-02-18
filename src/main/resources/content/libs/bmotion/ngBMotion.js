@@ -1,4 +1,4 @@
-define(['bms', 'angular-route', "bootstrap", "css!bootstrap-css"], function (bms) {
+define(['bms', '/bms/libs/bmotion/config.js', 'angular-route', "bootstrap", "css!bootstrap-css"], function (bms, config) {
 
         var getChanges = function (prev, now) {
             var changes = {}, prop, pc;
@@ -53,8 +53,8 @@ define(['bms', 'angular-route', "bootstrap", "css!bootstrap-css"], function (bms
                 // TODO: REMOVE DOM QUERY FROM CONTROLLER!!!
                 var event = {
                     templateUrl: document.URL,
-                    scriptPath: $("meta[name='bms.script']").attr("content"),
-                    modelPath: $("meta[name='bms.model']").attr("content"),
+                    scriptPath: config.script == "" ? $("meta[name='bms.script']").attr("content") : config.script,
+                    modelPath: config.model == "" ? $("meta[name='bms.model']").attr("content") : config.model,
                     tool: $("meta[name='bms.tool']").attr("content")
                 };
                 ws.emit('initSession', event, function (data) {
