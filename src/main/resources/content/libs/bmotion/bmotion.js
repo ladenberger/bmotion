@@ -5,171 +5,24 @@ define(["/bms/libs/bmotion/config.js", "jquery", "socketio", 'css!bmotion-css'],
         // ---------------------
         var socket = io.connect(config.socket.protocol + '//' + config.socket.host + ':' + config.socket.port);
 
-        var observers = {};
-        var formulaObservers = {};
-
-        socket.on('checkObserver', function (trigger) {
-
-            if (observers[trigger] !== undefined) {
-                $.each(observers[trigger], function (i, v) {
-                    v.call(this)
-                });
-            }
-
-            if (formulaObservers[trigger] !== undefined) {
-                socket.emit("observe", {data: formulaObservers[trigger]}, function (data) {
-                    $.each(formulaObservers[trigger], function (i, v) {
-                        v.observer.call(this, data[i])
-                    });
-                });
-            }
-
-        });
-
-        socket.on('applyTransformers', function (data) {
-            var d1 = JSON.parse(data);
-            var i1 = 0;
-            for (; i1 < d1.length; i1++) {
-                var t = d1[i1];
-                if (t.selector) {
-                    var selector = $(t.selector);
-                    var content = t.content;
-                    if (content != undefined) selector.html(content);
-                    selector.attr(t.attributes);
-                    selector.css(t.styles)
-                }
-            }
-        });
-
-        var addObserver = function (cause, observer) {
-            if (observers[cause] === undefined) observers[cause] = [];
-            observers[cause].push(observer)
-        };
-
-        var addFormulaObserver = function (cause, settings, observer) {
-            if (formulaObservers[cause] === undefined) formulaObservers[cause] = {};
-            settings.observer = observer;
-            formulaObservers[cause][guid()] = settings
-        };
-
-        var guid = (function () {
-            function s4() {
-                return Math.floor((1 + Math.random()) * 0x10000)
-                    .toString(16)
-                    .substring(1);
-            }
-
-            return function () {
-                return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-                    s4() + '-' + s4() + s4() + s4();
-            };
-        })();
-
-        // ---------------------
-
-        var executeEvent = function (options, origin) {
-            var settings = normalize($.extend({
-                events: [],
-                callback: function () {
-                }
-            }, options), ["callback"], origin);
-            socket.emit("executeEvent", {data: normalize(settings, ["callback"], origin)}, function (data) {
-                origin !== undefined ? settings.callback.call(this, origin, data) : settings.callback.call(this, data)
-            });
-            return settings
-        };
-
         var callMethod = function (options, origin) {
             var settings = normalize($.extend({
                 name: "",
                 callback: function () {
                 }
             }, options), ["callback"], origin);
-            socket.emit("callMethod", {data: normalize(settings, ["callback"], origin)}, function (data) {
+            socket.socket.emit("callMethod", {data: normalize(settings, ["callback"], origin)}, function (data) {
                 origin !== undefined ? settings.callback.call(this, origin, data) : settings.callback.call(this, data)
             });
             return settings
         };
-
-        var observeMethod = function (options, origin) {
-            var settings = normalize($.extend({
-                name: "",
-                cause: "AnimationChanged",
-                trigger: function () {
-                }
-            }, options), ["trigger"], origin);
-            addObserver(settings.cause, function () {
-                socket.emit("callMethod", {data: settings}, function (data) {
-                    origin !== undefined ? settings.trigger.call(this, $(origin), data) : settings.trigger.call(this, data)
-                });
-            });
-            return settings
-        };
-
-        var observeFormulas = function (options, origin) {
-            var settings = normalize($.extend({
-                formulas: [],
-                cause: "AnimationChanged",
-                trigger: function () {
-                }
-            }, options), ["trigger"], origin);
-            if (origin !== undefined) {
-                /*var $body = angular.element(document.body);
-                 console.log($body)
-                 var $rootScope = $body.scope().$root;
-                 $rootScope.$apply(function () {
-                 var id = $(origin).attr("id");
-                 if (id !== undefined) {
-                 $rootScope.addFormulaElement("#" + id);
-                 }
-                 });*/
-                $(origin).on("trigger", function (event, data) {
-                    settings.trigger.call(this, $(this), data)
-                });
-            }
-            addFormulaObserver(settings.cause, settings, function (data) {
-                origin !== undefined ? settings.trigger.call(this, $(origin), data) : settings.trigger.call(this, data)
-            });
-        };
-
-        var observe = function (what, options, origin) {
-            if (what === "formula") {
-                return observeFormulas(options, origin)
-            }
-            if (what === "method") {
-                return observeMethod(options, origin)
-            }
-        };
-
-        // ---------------------
-        // jQuery extension
-        // ---------------------
-        (function ($) {
-
-            $.fn.observe = function (what, options) {
-                this.each(function (i, v) {
-                    observe(what, options, v);
-                });
-                return this
-            };
-
-            $.fn.executeEvent = function (options) {
-                return this.click(function (e) {
-                    executeEvent(options, e.target)
-                }).css('cursor', 'pointer')
-            }
-
-        }(jQuery));
 
         // ---------------------
         // Return BMotion API functions
         // ---------------------
         return {
             socket: socket,
-            callMethod: callMethod,
-            executeEvent: executeEvent,
-            observe: observe,
-            addObserver: addObserver
+            callMethod: callMethod
         }
 
     }

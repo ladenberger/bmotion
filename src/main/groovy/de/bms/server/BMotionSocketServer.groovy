@@ -71,48 +71,6 @@ public class BMotionSocketServer {
                     }
                 });
 
-        server.addEventListener("executeEvent", JsonObject.class,
-                new DataListener<JsonObject>() {
-                    @Override
-                    public void onData(final SocketIOClient client, JsonObject d,
-                                       final AckRequest ackRequest) {
-                        def BMotion bmotion = getSession(client)
-                        if (bmotion != null) {
-                            def returnValue = bmotion.executeEvent(d.data)
-                            if (ackRequest.isAckRequested()) {
-                                ackRequest.sendAckData(returnValue);
-                            }
-                        }
-                    }
-                });
-
-        server.addEventListener("observe", JsonObject.class,
-                new DataListener<JsonObject>() {
-                    @Override
-                    public void onData(final SocketIOClient client, JsonObject d,
-                                       final AckRequest ackRequest) {
-                        def BMotion bmotion = getSession(client)
-                        if (bmotion != null) {
-                            if (ackRequest.isAckRequested()) {
-                                ackRequest.sendAckData(bmotion.observe(d));
-                            }
-                        }
-                    }
-                });
-
-        server.addEventListener("eval", JsonObject.class, new DataListener<JsonObject>() {
-            @Override
-            public void onData(final SocketIOClient client, JsonObject d,
-                               final AckRequest ackRequest) {
-                def BMotion bmotion = getSession(client)
-                if (bmotion != null) {
-                    if (ackRequest.isAckRequested()) {
-                        ackRequest.sendAckData([bmotion.eval(d.data.formula)]);
-                    }
-                }
-            }
-        });
-
         server.addEventListener("reloadModel", String.class,
                 new DataListener<String>() {
                     @Override
