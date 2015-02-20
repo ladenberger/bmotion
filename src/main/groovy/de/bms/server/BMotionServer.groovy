@@ -93,7 +93,6 @@ public class BMotionServer {
     public void start() {
         startBMotionSocketServer()
         startBMotionJettyServer()
-        openBrowser()
     }
 
     private startBMotionJettyServer() {
