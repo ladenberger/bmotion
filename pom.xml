@@ -4,14 +4,14 @@
 
     <groupId>de.bmotion</groupId>
     <artifactId>bmotion</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.1</version>
     <packaging>jar</packaging>
 
     <scm>
         <connection>scm:git:ssh://github.com/ladenberger/bmotion.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/ladenberger/bmotion.git</developerConnection>
         <url>https://github.com/ladenberger/bmotion</url>
-        <tag>HEAD</tag>
+        <tag>bmotion-0.1.1</tag>
     </scm>
 
     <distributionManagement>
