@@ -11,7 +11,7 @@ require.config({
         "bms": "/bms/libs/bmotion/bmotion",
         "ngBMotion": "/bms/libs/bmotion/ngBMotion",
         "jquery": "/bms/libs/jquery/jquery-1.11.0.min",
-        "socketio": "/bms/libs/socket.io/socket.io",
+        "socketio": "/bms/libs/socket.io/socket.io-1.3.4",
         "bootstrap": "/bms/libs/bootstrap/js/bootstrap.min",
         "bootstrap-css": "/bms/libs/bootstrap/css/bootstrap.min",
         "bmotion-css": "/bms/libs/bmotion/bmotion"

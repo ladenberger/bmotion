@@ -1,4 +1,4 @@
-define(["/bms/libs/bmotion/config.js", "jquery", "socketio", 'css!bmotion-css'], function (config) {
+define(["/bms/libs/bmotion/config.js", "socketio", "jquery", 'css!bmotion-css'], function (config, io) {
 
         // ---------------------
         // Establish client socket
