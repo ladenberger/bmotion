@@ -45,7 +45,7 @@ public abstract class BMotion {
     }
 
     public void checkObserver(final String trigger) {
-        log.info "Check observer, trigger: " + trigger
+        //log.info "Check observer, trigger: " + trigger
         observers.get(trigger)?.observers?.each { it.apply(this) }
         clients.each { it.sendEvent("checkObserver", trigger) }
     }
@@ -83,8 +83,7 @@ public abstract class BMotion {
     public Object observe(final d) {
         def map = [:]
         d.data.each { k, v ->
-            map.put(k, v.formulas.collect {
-                String formula -> eval(formula)
+            map.put(k, v.formulas.collect { String formula -> eval(formula)
             })
         }
         return map
