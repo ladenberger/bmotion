@@ -1,6 +1,7 @@
 package de.bms.server
 
 import com.google.common.io.Resources
+import de.bms.BMotionOptionProvider
 import de.bms.BMotionSocketListenerProvider
 import de.bms.BMotionVisualisationProvider
 import de.bms.DesktopApi
@@ -27,6 +28,8 @@ public class BMotionServer {
 
     def BMotionSocketServer socketServer
 
+    def CommandLine cmdLine
+
     def boolean standalone = false
 
     def ResourceResolver resourceResolver = new DefaultResourceResolver()
@@ -41,7 +44,7 @@ public class BMotionServer {
 
     def String visualisation = ""
 
-    public BMotionServer(String[] args) {
+    public BMotionServer(String[] args, BMotionOptionProvider optionProvider) {
 
         Options options = new Options()
         options.addOption(OptionBuilder.withArgName("workspace").hasArg()
@@ -59,33 +62,36 @@ public class BMotionServer {
         options.addOption(new Option("standalone", "Run in standalone mode"));
         options.addOption(new Option("local", "Run on localhost"));
 
+        if (optionProvider != null)
+            optionProvider.installOptions(options)
+
         CommandLineParser parser = new BasicParser()
-        CommandLine line = parser.parse(options, args);
-        if (line.hasOption("workspace")) {
-            this.workspacePath = line.getOptionValue("workspace");
+        cmdLine = parser.parse(options, args);
+        if (cmdLine.hasOption("workspace")) {
+            this.workspacePath = cmdLine.getOptionValue("workspace");
         }
-        if (line.hasOption("local")) {
+        if (cmdLine.hasOption("local")) {
             this.host = "localhost"
         }
-        if (line.hasOption("host")) {
-            this.host = line.getOptionValue("host")
+        if (cmdLine.hasOption("host")) {
+            this.host = cmdLine.getOptionValue("host")
         }
-        if (line.hasOption("port")) {
-            this.port = Integer.parseInt(line.getOptionValue("port"))
+        if (cmdLine.hasOption("port")) {
+            this.port = Integer.parseInt(cmdLine.getOptionValue("port"))
             this.customPort = true
         }
-        if (line.hasOption("socketHost")) {
-            this.socketHost = line.getOptionValue("socketHost")
+        if (cmdLine.hasOption("socketHost")) {
+            this.socketHost = cmdLine.getOptionValue("socketHost")
         }
-        if (line.hasOption("socketPort")) {
-            this.socketPort = Integer.parseInt(line.getOptionValue("socketPort"))
+        if (cmdLine.hasOption("socketPort")) {
+            this.socketPort = Integer.parseInt(cmdLine.getOptionValue("socketPort"))
             this.customSocketPort = true
         }
-        if (line.hasOption("standalone")) {
+        if (cmdLine.hasOption("standalone")) {
             this.standalone = true
         }
-        if (line.hasOption("visualisation")) {
-            this.visualisation = line.getOptionValue("visualisation")
+        if (cmdLine.hasOption("visualisation")) {
+            this.visualisation = cmdLine.getOptionValue("visualisation")
         }
 
     }

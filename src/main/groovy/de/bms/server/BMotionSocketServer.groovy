@@ -148,7 +148,7 @@ public class BMotionSocketServer {
                         }
                     }
                     if (!found) {
-                        log.error "No free port found between 19080 and 19179"
+                        log.error "No free port found between 19090 and 19179"
                     }
                 }
                 if (found) {
