@@ -31,8 +31,10 @@ public class BMotionServer {
 
     def ResourceResolver resourceResolver = new DefaultResourceResolver()
 
-    def int port = 8080
-    def int socketPort = 9090
+    def int port = 18080
+    def boolean customPort = false
+    def int socketPort = 19090
+    def boolean customSocketPort = false
 
     def String host = "0.0.0.0"
     def String socketHost = "0.0.0.0"
@@ -70,12 +72,14 @@ public class BMotionServer {
         }
         if (line.hasOption("port")) {
             this.port = Integer.parseInt(line.getOptionValue("port"))
+            this.customPort = true
         }
         if (line.hasOption("socketHost")) {
             this.socketHost = line.getOptionValue("socketHost")
         }
         if (line.hasOption("socketPort")) {
             this.socketPort = Integer.parseInt(line.getOptionValue("socketPort"))
+            customSocketPort = true
         }
         if (line.hasOption("standalone")) {
             this.standalone = true
@@ -95,28 +99,47 @@ public class BMotionServer {
         startBMotionJettyServer()
     }
 
+    private Boolean connectBMotionJettyServer(Server server, int port) {
+        try {
+            Connector connector = new SelectChannelConnector();
+            connector.setStatsOn(true);
+            connector.setServer(server);
+            connector.setHost(host);
+            Connector[] connectors = [connector]
+            server.setConnectors(connectors);
+            connector.setPort(port);
+            server.start();
+            return true;
+            log.info "Jetty server started on host " + host + " and port " + port
+        } catch (BindException ex) {
+            return false;
+        }
+    }
+
     private startBMotionJettyServer() {
         Server server = new Server();
         server.setHandler(setupWorkspaceHandler())
-        boolean found = false
-        while (!found && port < 8180) {
-            try {
-                Connector connector = new SelectChannelConnector();
-                connector.setStatsOn(true);
-                connector.setServer(server);
-                connector.setHost(host);
-                Connector[] connectors = [connector]
-                server.setConnectors(connectors);
-                connector.setPort(port);
-                server.start();
+        boolean found = false;
+        if (customPort) {
+            if (connectBMotionJettyServer(server, port)) {
                 found = true;
-                log.info "Jetty server started on host " + host + " and port " + port
-            } catch (BindException ex) {
-                port++;
+            }
+        } else {
+            while (!found && port < 18180) {
+                if (connectBMotionJettyServer(server, port)) {
+                    found = true;
+                } else {
+                    port++;
+                }
+            }
+            if (!found) {
+                log.error "No free port found between 18080 and 18179"
             }
         }
-        if (!found) {
-            log.error "No free port found between 8080 and 8179"
+        if (found) {
+            log.info "Jetty server started on host " + host + " and port " + port
+        } else {
+            log.error "Jetty server cannot be started on host " + host + " and port " + port + " (port is used)."
         }
     }
 
@@ -139,8 +162,9 @@ public class BMotionServer {
 
     private void startBMotionSocketServer() {
         // Create socket server
-        socketServer = new BMotionSocketServer(standalone, workspacePath, visualisationProvider, socketListenerProvider)
-        socketServer.start(socketHost, socketPort)
+        socketServer = new BMotionSocketServer(standalone, workspacePath, visualisationProvider,
+                socketListenerProvider)
+        socketServer.start(socketHost, socketPort, customSocketPort)
     }
 
     public int getPort() {

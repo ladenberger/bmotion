@@ -33,7 +33,7 @@ define(function () {
         socket: {
             protocol: document.location.protocol,
             host: document.location.hostname,
-            port: 9090
+            port: 19090
         },
         model: "",
         script: "",

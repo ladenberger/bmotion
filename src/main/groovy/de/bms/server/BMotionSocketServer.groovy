@@ -122,28 +122,45 @@ public class BMotionSocketServer {
 
     }
 
-    public void start(String host, int port) {
+    private Boolean connectBMotionSocketServer(int port) {
+        try {
+            createSocketIOServer(port).start()
+            return true;
+        } catch (BindException ex) {
+            return false;
+        }
+    }
 
+    public void start(String host, int port, boolean customPort) {
         new Thread(new Runnable() {
             public void run() {
-                boolean found = false
-                while (!found && port < 9180) {
-                    try {
-                        createSocketIOServer(port).start()
-                        log.info "Socket.io started on host " + host + " and port " + port
+                boolean found = false;
+                if (customPort) {
+                    if (connectBMotionSocketServer(port)) {
                         found = true;
-                        Thread.sleep(Integer.MAX_VALUE);
-                        server.stop();
-                    } catch (BindException ex) {
-                        port++;
+                    }
+                } else {
+                    while (!found && port < 19180) {
+                        if (connectBMotionSocketServer(port)) {
+                            found = true;
+                        } else {
+                            port++;
+                        }
+                    }
+                    if (!found) {
+                        log.error "No free port found between 19080 and 19179"
                     }
                 }
-                if (!found) {
-                    log.error "No free port found between 9090 and 9179"
+                if (found) {
+                    log.info "Socket.io started on host " + host + " and port " + port
+                    Thread.sleep(Integer.MAX_VALUE);
+                    server.stop();
+                } else {
+                    log.error "Socket.io cannot be started on host " + host + " and port " + port + " (port is used)."
                 }
+
             }
         }).start();
-
     }
 
     public BMotion getSession(SocketIOClient client) {
