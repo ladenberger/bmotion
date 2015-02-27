@@ -79,7 +79,7 @@ public class BMotionServer {
         }
         if (line.hasOption("socketPort")) {
             this.socketPort = Integer.parseInt(line.getOptionValue("socketPort"))
-            customSocketPort = true
+            this.customSocketPort = true
         }
         if (line.hasOption("standalone")) {
             this.standalone = true
