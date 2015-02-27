@@ -121,7 +121,7 @@
         <dependency>
             <groupId>com.corundumstudio.socketio</groupId>
             <artifactId>netty-socketio</artifactId>
-            <version>1.6.5</version>
+            <version>1.7.7</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
