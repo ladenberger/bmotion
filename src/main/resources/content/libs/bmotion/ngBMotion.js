@@ -56,8 +56,6 @@ define(['bms', '/bms/libs/bmotion/config.js', 'angular-route', "bootstrap", "css
                 });
                 return defer.promise;
             }])
-            .run(['$rootScope', 'initSession', function ($rootScope, initSession) {
-            }])
             .directive('bmsApp', ['initSession', '$compile', function (initSession, $compile) {
                 return {
                     priority: 1,
