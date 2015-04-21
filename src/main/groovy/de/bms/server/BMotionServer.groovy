@@ -1,19 +1,10 @@
 package de.bms.server
 
-import com.google.common.io.Resources
 import de.bms.BMotionOptionProvider
 import de.bms.BMotionSocketListenerProvider
 import de.bms.BMotionVisualisationProvider
-import de.bms.DesktopApi
 import groovy.util.logging.Slf4j
 import org.apache.commons.cli.*
-import org.eclipse.jetty.server.Connector
-import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.server.handler.ContextHandler
-import org.eclipse.jetty.server.handler.ResourceHandler
-import org.eclipse.jetty.server.nio.SelectChannelConnector
-import org.eclipse.jetty.util.resource.Resource
-import org.eclipse.jetty.util.resource.ResourceCollection
 
 @Slf4j
 public class BMotionServer {
@@ -24,7 +15,7 @@ public class BMotionServer {
 
     private BMotionSocketListenerProvider socketListenerProvider
 
-    private URL[] resourcePaths
+    //private URL[] resourcePaths
 
     def BMotionSocketServer socketServer
 
@@ -32,14 +23,14 @@ public class BMotionServer {
 
     def boolean standalone = false
 
-    def ResourceResolver resourceResolver = new DefaultResourceResolver()
+    //def ResourceResolver resourceResolver = new DefaultResourceResolver()
 
-    def int port = 18080
+    //def int port = 18080
     def boolean customPort = false
     def int socketPort = 19090
     def boolean customSocketPort = false
 
-    def String host = "0.0.0.0"
+    //def String host = "0.0.0.0"
     def String socketHost = "0.0.0.0"
 
     def String visualisation = ""
@@ -49,10 +40,10 @@ public class BMotionServer {
         Options options = new Options()
         options.addOption(OptionBuilder.withArgName("workspace").hasArg()
                 .withDescription("Workspace").create("workspace"))
-        options.addOption(OptionBuilder.withArgName("host").hasArg()
+        /*options.addOption(OptionBuilder.withArgName("host").hasArg()
                 .withDescription("Host").create("host"))
         options.addOption(OptionBuilder.withArgName("port").hasArg()
-                .withDescription("Port").create("port"))
+                .withDescription("Port").create("port"))*/
         options.addOption(OptionBuilder.withArgName("socketHost").hasArg()
                 .withDescription("Socket Host").create("socketHost"))
         options.addOption(OptionBuilder.withArgName("socketPort").hasArg()
@@ -70,7 +61,7 @@ public class BMotionServer {
         if (cmdLine.hasOption("workspace")) {
             this.workspacePath = cmdLine.getOptionValue("workspace");
         }
-        if (cmdLine.hasOption("local")) {
+        /*if (cmdLine.hasOption("local")) {
             this.host = "localhost"
         }
         if (cmdLine.hasOption("host")) {
@@ -79,7 +70,7 @@ public class BMotionServer {
         if (cmdLine.hasOption("port")) {
             this.port = Integer.parseInt(cmdLine.getOptionValue("port"))
             this.customPort = true
-        }
+        }*/
         if (cmdLine.hasOption("socketHost")) {
             this.socketHost = cmdLine.getOptionValue("socketHost")
         }
@@ -96,16 +87,16 @@ public class BMotionServer {
 
     }
 
-    public void setResourcePaths(URL[] resourcePaths) {
+    /*public void setResourcePaths(URL[] resourcePaths) {
         this.resourcePaths = resourcePaths
-    }
+    }*/
 
     public void start() {
         startBMotionSocketServer()
-        startBMotionJettyServer()
+        //startBMotionJettyServer()
     }
 
-    private Boolean connectBMotionJettyServer(Server server, int port) {
+    /*private Boolean connectBMotionJettyServer(Server server, int port) {
         try {
             Connector connector = new SelectChannelConnector();
             connector.setStatsOn(true);
@@ -120,9 +111,9 @@ public class BMotionServer {
         } catch (BindException ex) {
             return false;
         }
-    }
+    }*/
 
-    private startBMotionJettyServer() {
+    /*private startBMotionJettyServer() {
         Server server = new Server();
         server.setHandler(setupWorkspaceHandler())
         boolean found = false;
@@ -147,14 +138,13 @@ public class BMotionServer {
         } else {
             log.error "Jetty server cannot be started on host " + host + " and port " + port + " (port is used)."
         }
-    }
+    }*/
 
-    private ContextHandler setupWorkspaceHandler() {
+    /*private ContextHandler setupWorkspaceHandler() {
         ContextHandler context = new ContextHandler();
         context.setContextPath("/bms");
         ResourceHandler resHandler = new ResourceHandler()
-        Resource[] s = [Resource.newResource(resourceResolver.resolve(Resources.getResource("content"))), Resource.
-                newResource(workspacePath)]
+        Resource[] s = [Resource.newResource(workspacePath)]
         resourcePaths.each {
             s += Resource.newResource(resourceResolver.resolve(it))
         }
@@ -164,7 +154,7 @@ public class BMotionServer {
         resHandler.setDirectoriesListed(true)
         context.setHandler(resHandler)
         return context
-    }
+    }*/
 
     private void startBMotionSocketServer() {
         // Create socket server
@@ -173,18 +163,18 @@ public class BMotionServer {
         socketServer.start(socketHost, socketPort, customSocketPort)
     }
 
-    public int getPort() {
+    /*public int getPort() {
         return port
     }
 
     public String getHost() {
         return host
-    }
+    }*/
 
-    public void openBrowser() {
+    /*public void openBrowser() {
         java.net.URI uri = new java.net.URI("http://" + host + ":" + port + "/bms/" + visualisation)
         DesktopApi.browse(uri)
-    }
+    }*/
 
     public void setSocketListenerProvider(BMotionSocketListenerProvider provider) {
         this.socketListenerProvider = provider

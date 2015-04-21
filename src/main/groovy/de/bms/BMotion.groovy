@@ -1,13 +1,10 @@
 package de.bms
 
 import com.corundumstudio.socketio.SocketIOClient
-import com.google.common.base.Charsets
-import com.google.common.io.Resources
 import de.bms.observer.BMotionObserver
 import de.bms.observer.BMotionTransformer
 import de.bms.observer.TransformersObserver
 import de.bms.server.BMotionScriptEngineProvider
-import de.bms.server.SessionConfiguration
 import groovy.util.logging.Slf4j
 
 @Slf4j
@@ -15,43 +12,46 @@ public abstract class BMotion {
 
     def final static String TRIGGER_ANIMATION_CHANGED = "AnimationChanged"
 
-    def final Map<String, Trigger> observers = [:]
+    //def final Map<String, Trigger> observers = [:]
 
     def final Map<String, Closure> methods = [:]
 
-    def TransformersObserver transformerObserver
+    //def TransformersObserver transformerObserver
+
+    def String modelPath
 
     def boolean initialised = false
 
     def UUID sessionId
 
-    def List<SocketIOClient> clients = new ArrayList<SocketIOClient>()
+    def SocketIOClient client
 
-    def SessionConfiguration sessionConfiguration
-
-    def templatePath
+    //def SessionConfiguration sessionConfiguration
 
     def final BMotionScriptEngineProvider scriptEngineProvider
 
-    public BMotion(final UUID sessionId, final String templatePath,
-                   final BMotionScriptEngineProvider scriptEngineProvider) {
+    public BMotion(final UUID sessionId, final BMotionScriptEngineProvider scriptEngineProvider) {
         this.sessionId = sessionId
-        this.templatePath = templatePath
         this.scriptEngineProvider = scriptEngineProvider
     }
 
-    public BMotion(final UUID sessionId, final String templatePath) {
-        this(sessionId, templatePath, new DefaultScriptEngineProvider())
+    public BMotion(final UUID sessionId) {
+        this(sessionId, new DefaultScriptEngineProvider())
     }
 
-    public void checkObserver(final String trigger) {
+    public void setClient(SocketIOClient client) {
+        this.client = client;
+    }
+
+    public void checkObserver(final data) {
         //log.info "Check observer, trigger: " + trigger
-        observers.get(trigger)?.observers?.each { it.apply(this) }
-        clients.each { it.sendEvent("checkObserver", trigger) }
+        if (client != null) {
+            client.sendEvent("checkObserver", data)
+        }
     }
 
     public void checkObserver() {
-        checkObserver(TRIGGER_ANIMATION_CHANGED)
+        checkObserver([trigger: TRIGGER_ANIMATION_CHANGED])
     }
 
     // ---------- BMS API
@@ -114,12 +114,13 @@ public abstract class BMotion {
 
     // ------------------
 
-    public void initSession(SessionConfiguration sessionConfiguration) {
+    public void initSession(String modelPath) {
         log.debug "Initialising BMotion Session"
-        initModel(sessionConfiguration?.modelPath)
-        initObservers()
-        initGroovyScript(sessionConfiguration?.scriptPath)
-        this.sessionConfiguration = sessionConfiguration
+        this.modelPath = modelPath;
+        initModel(modelPath)
+        //initObservers()
+        //initGroovyScript(sessionConfiguration?.scriptPath)
+        //this.sessionConfiguration = sessionConfiguration
         initialised = true;
         log.debug "BMotion Session initialised"
     }
@@ -133,20 +134,23 @@ public abstract class BMotion {
         this.observers.put(TRIGGER_ANIMATION_CHANGED, trigger)
     }
 
-    private void initModel(String modelPath, boolean force = false) {
-        File modelFile = new File(getTemplateFolder() + File.separator + modelPath)
+    private String initModel(String modelPath, boolean force = false) {
+        File modelFile = new File(modelPath)
         if (modelFile.exists()) {
             log.info "Loading model " + modelPath
-            loadModel(modelFile, force)
-            log.info "Model loaded"
+            return loadModel(modelFile, force)
         }
     }
 
-    public abstract void loadModel(File modelFile, boolean force)
+    public String reloadModel() {
+        return initModel(this.modelPath, true)
+    }
+
+    public abstract String loadModel(File modelFile, boolean force)
 
     public abstract void refresh()
 
-    private void initGroovyScript(String scriptPath) {
+    /*private void initGroovyScript(String scriptPath) {
         if (scriptPath) {
             String[] scriptPaths = scriptPath.split(",")
             String templateFolder = getTemplateFolder()
@@ -173,26 +177,10 @@ public abstract class BMotion {
                 BMotionScriptException.checkForScriptErrors(e, scriptPaths)
             }
         }
-    }
+    }*/
 
-    public void reloadModel() {
-        initModel(sessionConfiguration?.modelPath, true)
-    }
-
-    public String getTemplateFolder() {
-        return new File(templatePath).getParent()
-    }
-
-    public boolean isInitialised() {
-        return initialised;
-    }
-
-    public SessionConfiguration getSessionConfiguration() {
-        return sessionConfiguration
-    }
-
-    public String[] getScriptPaths() {
+    /*public String[] getScriptPaths() {
         return sessionConfiguration?.scriptPath?.split(",")
-    }
+    }*/
 
 }

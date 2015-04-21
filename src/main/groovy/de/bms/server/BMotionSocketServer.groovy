@@ -71,50 +71,17 @@ public class BMotionSocketServer {
                     }
                 });
 
-        server.addEventListener("reloadModel", String.class,
+        server.addEventListener("refresh", String.class,
                 new DataListener<String>() {
                     @Override
                     public void onData(final SocketIOClient client, String s,
                                        final AckRequest ackRequest) {
                         def BMotion bmotion = getSession(client)
                         if (bmotion != null) {
-                            bmotion.reloadModel()
+                            bmotion.refresh()
                         }
                     }
                 });
-
-        server.addEventListener("initSession", SessionConfiguration.class, new DataListener<SessionConfiguration>() {
-            @Override
-            public void onData(final SocketIOClient client, SessionConfiguration sessionConfiguration,
-                               final AckRequest ackRequest) {
-
-                URL url = new URL(sessionConfiguration.templateUrl)
-                File templateFile = new File(workspacePath + File.separator + url.getPath().replace("/bms/", ""))
-                BMotionSocketServer.log.debug "Template: " + templateFile
-                def BMotion bmotion = sessions.get(url.getPath()) ?: null
-                if (bmotion == null) {
-                    bmotion = createSession(sessionConfiguration.tool, templateFile, visualisationProvider)
-                    sessions.put(url.getPath(), bmotion)
-                    BMotionSocketServer.log.info "Created new BMotion session " + bmotion.sessionId
-                }
-                // Add client to session
-                BMotionSocketServer.log.info "Add client " + client.sessionId + " for BMotion session " + bmotion.sessionId
-                bmotion.clients.add(client)
-                // Bound client to current visualisation
-                clients.put(client, url.getPath())
-                // Initialise session
-                bmotion.initSession(sessionConfiguration)
-                BMotionSocketServer.log.info "Refresh BMotion session " + bmotion.sessionId
-                // Send content of linked SVG files to client
-                if (ackRequest.isAckRequested()) {
-                    def data = [standalone: standalone]
-                    ackRequest.sendAckData(data)
-                }
-                bmotion.refresh()
-                client.sendEvent("initialised")
-
-            }
-        });
 
         socketListenerProvider?.installListeners(this)
 
