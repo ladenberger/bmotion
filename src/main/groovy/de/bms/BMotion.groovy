@@ -1,10 +1,6 @@
 package de.bms
 
 import com.corundumstudio.socketio.SocketIOClient
-import de.bms.observer.BMotionObserver
-import de.bms.observer.BMotionTransformer
-import de.bms.observer.TransformersObserver
-import de.bms.server.BMotionScriptEngineProvider
 import groovy.util.logging.Slf4j
 
 @Slf4j
@@ -12,11 +8,9 @@ public abstract class BMotion {
 
     def final static String TRIGGER_ANIMATION_CHANGED = "AnimationChanged"
 
-    //def final Map<String, Trigger> observers = [:]
-
     def final Map<String, Closure> methods = [:]
 
-    //def TransformersObserver transformerObserver
+    def String mode = BMotionServer.MODE_INTEGRATED
 
     def String modelPath
 
@@ -25,8 +19,6 @@ public abstract class BMotion {
     def UUID sessionId
 
     def SocketIOClient client
-
-    //def SessionConfiguration sessionConfiguration
 
     def final BMotionScriptEngineProvider scriptEngineProvider
 
@@ -54,30 +46,6 @@ public abstract class BMotion {
         checkObserver([trigger: TRIGGER_ANIMATION_CHANGED])
     }
 
-    // ---------- BMS API
-    public void registerObserver(final BMotionObserver o, String trigger = TRIGGER_ANIMATION_CHANGED) {
-        registerObserver([o], trigger)
-    }
-
-    public void registerObserver(final List<BMotionObserver> o, String trigger = TRIGGER_ANIMATION_CHANGED) {
-        o.each {
-            (it instanceof BMotionTransformer) ? transformerObserver.add(it) :
-                    observers.get(trigger)?.observers?.add(it)
-        }
-    }
-
-    public void apply(final String name, data) {
-        clients.each { it.sendEvent(name, data) }
-    }
-
-    public void apply(final BMotionObserver o) {
-        o.apply(this)
-    }
-
-    public void apply(final List<BMotionObserver> o) {
-        o.each { apply(it) }
-    }
-
     public abstract Object executeEvent(final data) throws ImpossibleStepException
 
     public Object observe(final d) {
@@ -101,7 +69,7 @@ public abstract class BMotion {
      */
     public abstract Object eval(final String formula) throws IllegalFormulaException
 
-    public void registerMethod(String name, Closure cls) {
+    /*public void registerMethod(String name, Closure cls) {
         methods.put(name, cls)
     }
 
@@ -110,9 +78,7 @@ public abstract class BMotion {
         if (cls != null)
             return cls(data)
         return null
-    }
-
-    // ------------------
+    }*/
 
     public void initSession(String modelPath) {
         log.debug "Initialising BMotion Session"
@@ -125,15 +91,7 @@ public abstract class BMotion {
         log.debug "BMotion Session initialised"
     }
 
-    private void initObservers() {
-        this.observers.clear()
-        this.methods.clear()
-        this.transformerObserver = new TransformersObserver()
-        def Trigger trigger = new Trigger()
-        trigger.observers.add(this.transformerObserver)
-        this.observers.put(TRIGGER_ANIMATION_CHANGED, trigger)
-    }
-
+    // ------------------
     private String initModel(String modelPath, boolean force = false) {
         File modelFile = new File(modelPath)
         if (modelFile.exists()) {

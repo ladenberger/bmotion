@@ -1,4 +1,4 @@
-package de.bms.server
+package de.bms
 
 public class DefaultResourceResolver implements ResourceResolver {
 

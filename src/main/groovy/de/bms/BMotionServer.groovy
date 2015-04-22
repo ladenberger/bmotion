@@ -1,21 +1,32 @@
-package de.bms.server
+package de.bms
 
-import de.bms.BMotionOptionProvider
-import de.bms.BMotionSocketListenerProvider
-import de.bms.BMotionVisualisationProvider
 import groovy.util.logging.Slf4j
 import org.apache.commons.cli.*
+import org.eclipse.jetty.server.Connector
+import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.server.handler.ContextHandler
+import org.eclipse.jetty.server.handler.ResourceHandler
+import org.eclipse.jetty.server.nio.SelectChannelConnector
+import org.eclipse.jetty.util.resource.Resource
+import org.eclipse.jetty.util.resource.ResourceCollection
 
 @Slf4j
 public class BMotionServer {
 
-    private String workspacePath
+    def final static String MODE_INTEGRATED = "ModeIntegrated"
+    def final static String MODE_STANDALONE = "ModeStandalone"
 
-    private BMotionVisualisationProvider visualisationProvider
+    def String mode = MODE_INTEGRATED
 
-    private BMotionSocketListenerProvider socketListenerProvider
+    def String workspacePath
 
-    //private URL[] resourcePaths
+    def BMotionVisualisationProvider visualisationProvider
+
+    def BMotionSocketListenerProvider socketListenerProvider
+
+    def SocketServerListener serverStartedListener
+
+    private URL[] resourcePaths
 
     def BMotionSocketServer socketServer
 
@@ -23,14 +34,16 @@ public class BMotionServer {
 
     def boolean standalone = false
 
-    //def ResourceResolver resourceResolver = new DefaultResourceResolver()
+    def String clientApp = System.getProperty("user.dir") + File.separator + "client" + File.separator + "bms"
 
-    //def int port = 18080
+    def ResourceResolver resourceResolver = new DefaultResourceResolver()
+
+    def int port = 18080
     def boolean customPort = false
     def int socketPort = 19090
     def boolean customSocketPort = false
 
-    //def String host = "0.0.0.0"
+    def String host = "0.0.0.0"
     def String socketHost = "0.0.0.0"
 
     def String visualisation = ""
@@ -40,10 +53,12 @@ public class BMotionServer {
         Options options = new Options()
         options.addOption(OptionBuilder.withArgName("workspace").hasArg()
                 .withDescription("Workspace").create("workspace"))
-        /*options.addOption(OptionBuilder.withArgName("host").hasArg()
+        options.addOption(OptionBuilder.withArgName("clientApp").hasArg()
+                .withDescription("Path to client application").create("clientApp"))
+        options.addOption(OptionBuilder.withArgName("host").hasArg()
                 .withDescription("Host").create("host"))
         options.addOption(OptionBuilder.withArgName("port").hasArg()
-                .withDescription("Port").create("port"))*/
+                .withDescription("Port").create("port"))
         options.addOption(OptionBuilder.withArgName("socketHost").hasArg()
                 .withDescription("Socket Host").create("socketHost"))
         options.addOption(OptionBuilder.withArgName("socketPort").hasArg()
@@ -61,7 +76,10 @@ public class BMotionServer {
         if (cmdLine.hasOption("workspace")) {
             this.workspacePath = cmdLine.getOptionValue("workspace");
         }
-        /*if (cmdLine.hasOption("local")) {
+        if (cmdLine.hasOption("clientApp")) {
+            this.clientApp = cmdLine.getOptionValue("clientApp");
+        }
+        if (cmdLine.hasOption("local")) {
             this.host = "localhost"
         }
         if (cmdLine.hasOption("host")) {
@@ -70,7 +88,7 @@ public class BMotionServer {
         if (cmdLine.hasOption("port")) {
             this.port = Integer.parseInt(cmdLine.getOptionValue("port"))
             this.customPort = true
-        }*/
+        }
         if (cmdLine.hasOption("socketHost")) {
             this.socketHost = cmdLine.getOptionValue("socketHost")
         }
@@ -87,16 +105,21 @@ public class BMotionServer {
 
     }
 
-    /*public void setResourcePaths(URL[] resourcePaths) {
+    public void setResourcePaths(URL[] resourcePaths) {
         this.resourcePaths = resourcePaths
-    }*/
+    }
 
     public void start() {
         startBMotionSocketServer()
         //startBMotionJettyServer()
     }
 
-    /*private Boolean connectBMotionJettyServer(Server server, int port) {
+    public void startWithJetty() {
+        start();
+        startBMotionJettyServer()
+    }
+
+    private Boolean connectBMotionJettyServer(Server server, int port) {
         try {
             Connector connector = new SelectChannelConnector();
             connector.setStatsOn(true);
@@ -111,9 +134,9 @@ public class BMotionServer {
         } catch (BindException ex) {
             return false;
         }
-    }*/
+    }
 
-    /*private startBMotionJettyServer() {
+    private startBMotionJettyServer() {
         Server server = new Server();
         server.setHandler(setupWorkspaceHandler())
         boolean found = false;
@@ -138,11 +161,11 @@ public class BMotionServer {
         } else {
             log.error "Jetty server cannot be started on host " + host + " and port " + port + " (port is used)."
         }
-    }*/
+    }
 
-    /*private ContextHandler setupWorkspaceHandler() {
+    private ContextHandler setupWorkspaceHandler() {
         ContextHandler context = new ContextHandler();
-        context.setContextPath("/bms");
+        //context.setContextPath("/");
         ResourceHandler resHandler = new ResourceHandler()
         Resource[] s = [Resource.newResource(workspacePath)]
         resourcePaths.each {
@@ -154,34 +177,17 @@ public class BMotionServer {
         resHandler.setDirectoriesListed(true)
         context.setHandler(resHandler)
         return context
-    }*/
+    }
 
     private void startBMotionSocketServer() {
         // Create socket server
-        socketServer = new BMotionSocketServer(standalone, workspacePath, visualisationProvider,
-                socketListenerProvider)
+        socketServer = new BMotionSocketServer(this)
         socketServer.start(socketHost, socketPort, customSocketPort)
     }
 
-    /*public int getPort() {
-        return port
-    }
-
-    public String getHost() {
-        return host
-    }*/
-
-    /*public void openBrowser() {
-        java.net.URI uri = new java.net.URI("http://" + host + ":" + port + "/bms/" + visualisation)
+    public void openBrowser() {
+        java.net.URI uri = new java.net.URI("http://" + host + ":" + port + File.separator + visualisation)
         DesktopApi.browse(uri)
-    }*/
-
-    public void setSocketListenerProvider(BMotionSocketListenerProvider provider) {
-        this.socketListenerProvider = provider
-    }
-
-    public void setVisualisationProvider(BMotionVisualisationProvider provider) {
-        this.visualisationProvider = provider
     }
 
 }

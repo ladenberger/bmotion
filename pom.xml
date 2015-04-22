@@ -145,7 +145,7 @@
             <version>14.0.1</version>
         </dependency>
 
-        <!--dependency>
+        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-io</artifactId>
             <version>${jetty.version}</version>
@@ -159,7 +159,7 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-util</artifactId>
             <version>${jetty.version}</version>
-        </dependency-->
+        </dependency>
 
     </dependencies>
 
