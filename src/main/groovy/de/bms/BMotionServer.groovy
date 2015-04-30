@@ -15,6 +15,7 @@ public class BMotionServer {
 
     def final static String MODE_INTEGRATED = "ModeIntegrated"
     def final static String MODE_STANDALONE = "ModeStandalone"
+    def final static String MODE_ONLINE = "ModeOnline"
 
     def String mode = MODE_INTEGRATED
 
