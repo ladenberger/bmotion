@@ -47,7 +47,7 @@ public abstract class BMotion {
 
     public abstract Object executeEvent(final data) throws ImpossibleStepException
 
-    public Object evaluateFormulas(final d) {
+    public Object evaluateFormulas(final d) throws BMotionException {
         def map = [:]
         d.data.each { k, v ->
             map.put(k, v.formulas.collect { String formula -> eval(formula)
