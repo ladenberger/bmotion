@@ -8,7 +8,7 @@ public abstract class BMotion {
 
     def final static String TRIGGER_ANIMATION_CHANGED = "AnimationChanged"
 
-    def final Map<String, Closure> methods = [:]
+    //def final Map<String, Closure> methods = [:]
 
     def String mode = BMotionServer.MODE_INTEGRATED
 
@@ -36,7 +36,6 @@ public abstract class BMotion {
     }
 
     public void checkObserver(final data) {
-        //log.info "Check observer, trigger: " + trigger
         if (client != null) {
             client.sendEvent("checkObserver", data)
         }
@@ -80,31 +79,24 @@ public abstract class BMotion {
         return null
     }*/
 
-    public void initSession(String modelPath) {
-        log.debug "Initialising BMotion Session"
+    public void initSession(String modelPath) throws BMotionException {
         this.modelPath = modelPath;
+        this.initialised = true;
         initModel(modelPath)
-        //initObservers()
-        //initGroovyScript(sessionConfiguration?.scriptPath)
-        //this.sessionConfiguration = sessionConfiguration
-        initialised = true;
-        log.debug "BMotion Session initialised"
     }
 
     // ------------------
-    private String initModel(String modelPath, boolean force = false) {
+    private void initModel(String modelPath, boolean force = false) throws BMotionException {
         File modelFile = new File(modelPath)
         if (modelFile.exists()) {
-            log.info "Loading model " + modelPath
-            return loadModel(modelFile, force)
+            log.info "BMotion Studio: Loading model " + modelPath
+            loadModel(modelFile, force)
+        } else {
+            throw new BMotionException("Model " + modelPath + " does not exist")
         }
     }
 
-    public String reloadModel() {
-        return initModel(this.modelPath, true)
-    }
-
-    public abstract String loadModel(File modelFile, boolean force)
+    public abstract void loadModel(File modelFile, boolean force)
 
     public abstract void refresh()
 
