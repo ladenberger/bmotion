@@ -35,14 +35,18 @@ public abstract class BMotion {
         this.client = client;
     }
 
-    public void checkObserver(final data) {
+    public void checkObserver(String trigger, Object data) {
         if (client != null) {
-            client.sendEvent("checkObserver", data)
+            client.sendEvent('checkObserver', trigger, data)
         }
     }
 
+    public void checkObserver(String trigger) {
+        checkObserver(trigger, [])
+    }
+
     public void checkObserver() {
-        checkObserver([trigger: TRIGGER_ANIMATION_CHANGED])
+        checkObserver(TRIGGER_ANIMATION_CHANGED, [])
     }
 
     public abstract Object executeEvent(final data) throws ImpossibleStepException
@@ -98,7 +102,7 @@ public abstract class BMotion {
 
     public abstract void loadModel(File modelFile, boolean force)
 
-    public abstract void refresh()
+    public abstract void disconnect();
 
     /*private void initGroovyScript(String scriptPath) {
         if (scriptPath) {
