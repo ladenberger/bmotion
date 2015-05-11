@@ -16,19 +16,19 @@ public abstract class BMotion {
 
     def boolean initialised = false
 
-    def UUID sessionId
+    def final UUID id
 
     def SocketIOClient client
 
     def final BMotionScriptEngineProvider scriptEngineProvider
 
-    public BMotion(final UUID sessionId, final BMotionScriptEngineProvider scriptEngineProvider) {
-        this.sessionId = sessionId
+    public BMotion(final UUID id, final BMotionScriptEngineProvider scriptEngineProvider) {
+        this.id = id
         this.scriptEngineProvider = scriptEngineProvider
     }
 
-    public BMotion(final UUID sessionId) {
-        this(sessionId, new DefaultScriptEngineProvider())
+    public BMotion() {
+        this(UUID.randomUUID(), new DefaultScriptEngineProvider())
     }
 
     public void setClient(SocketIOClient client) {
