@@ -1,7 +1,0 @@
-Script.getMetaClass().callMethod = { a1,a2 ->
-	new MethodObserver(a1).with a2
-}
-
-Script.getMetaClass().transform = { a1,a2 ->
-	new TransformerObserver(a1).with a2
-}

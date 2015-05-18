@@ -68,9 +68,9 @@ public abstract class BMotion {
      *            The formula to evaluate
      * @return the result of the formula or null if no result was found or no
      *         an exception was thrown.
-     * @throws IllegalFormulaException
+     * @throws BMotionException
      */
-    public abstract Object eval(final String formula) throws IllegalFormulaException
+    public abstract Object eval(final String formula) throws BMotionException
 
     /*public void registerMethod(String name, Closure cls) {
         methods.put(name, cls)
