@@ -43,7 +43,6 @@ public class BMotionServer {
     def boolean customPort = false
     def int socketPort = 19090
     def boolean customSocketPort = false
-    def int heartbeatport = 9322
 
     def String host = "0.0.0.0"
     def String socketHost = "0.0.0.0"
@@ -100,9 +99,6 @@ public class BMotionServer {
         }
         if (cmdLine.hasOption("standalone")) {
             this.standalone = true
-        }
-        if (cmdLine.hasOption("heartbeatport")) {
-            this.heartbeatport = Integer.parseInt(cmdLine.getOptionValue("heartbeatport"))
         }
         if (cmdLine.hasOption("visualisation")) {
             this.visualisation = cmdLine.getOptionValue("visualisation")
