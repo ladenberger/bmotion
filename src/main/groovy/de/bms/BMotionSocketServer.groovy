@@ -61,10 +61,20 @@ public class BMotionSocketServer {
                     }
                 }
                 if (found) {
-                    log.info "Socket.io started on host " + host + " and port " + port
-                    server.serverStartedListener?.serverStarted(server.clientApp);
-                    Thread.sleep(Integer.MAX_VALUE);
-                    socket.stop();
+                    log.info "Socket.io started on host " + host + ", port " + port
+
+                    try {
+                        BufferedWriter log = new BufferedWriter(new OutputStreamWriter(System.out));
+                        log.write("started\n");
+                        log.flush();
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    server.serverStartedListener?.serverStarted(socket)
+                    Thread.sleep(Integer.MAX_VALUE)
+                    socket.stop()
                 } else {
                     log.error "Socket.io cannot be started on host " + host + " and port " + port + " (port is used)."
                 }

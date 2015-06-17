@@ -12,8 +12,17 @@ appender("STDOUT", ConsoleAppender) {
     }
 }
 
+/*appender("FILE", FileAppender) {
+    file = "/home/lukas/tmp/bmsserver.log"
+    append = true
+    encoder(PatternLayoutEncoder) {
+        pattern = "%d{HH:mm:ss.SSS} %.-5level %logger{36} - %msg%n"
+    }
+}*/
+
 logger("de.prob.cli", OFF)
 logger("de.prob.animator", OFF)
 logger("org.eclipse.jetty", ERROR)
 logger("com.corundumstudio.socketio", WARN)
+//root(INFO, ["STDOUT", "FILE"])
 root(INFO, ["STDOUT"])

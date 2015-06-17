@@ -1,9 +1,9 @@
 package de.bms
 
+import com.corundumstudio.socketio.SocketIOServer
+
 interface SocketServerListener {
 
-    public void serverStarted(String clientApp);
-
-    public void serverCloseRequest();
+    public void serverStarted(SocketIOServer socket);
 
 }
