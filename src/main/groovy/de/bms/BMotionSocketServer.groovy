@@ -3,6 +3,7 @@ package de.bms
 import com.corundumstudio.socketio.Configuration
 import com.corundumstudio.socketio.SocketConfig
 import com.corundumstudio.socketio.SocketIOServer
+import com.google.gson.stream.JsonWriter
 import groovy.util.logging.Slf4j
 
 @Slf4j
@@ -62,16 +63,9 @@ public class BMotionSocketServer {
                 }
                 if (found) {
                     log.info "Socket.io started on host " + host + ", port " + port
-
-                    try {
-                        BufferedWriter log = new BufferedWriter(new OutputStreamWriter(System.out));
-                        log.write("started\n");
-                        log.flush();
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
+                    OutputStreamWriter writer = new OutputStreamWriter(System.out);
+                    JsonWriter jsonWriter = new JsonWriter(writer);
+                    jsonWriter.beginObject().name("host").value(host).name("port").value(port).endObject().flush();
                     server.serverStartedListener?.serverStarted(socket)
                     Thread.sleep(Integer.MAX_VALUE)
                     socket.stop()
