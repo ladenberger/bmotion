@@ -111,13 +111,12 @@ public class BMotionServer {
     }
 
     public void start() {
-        startBMotionSocketServer()
-        //startBMotionJettyServer()
+        startBMotionSocketServer();
     }
 
     public void startWithJetty() {
         start();
-        startBMotionJettyServer()
+        startBMotionJettyServer();
     }
 
     private Boolean connectBMotionJettyServer(Server server, int port) {

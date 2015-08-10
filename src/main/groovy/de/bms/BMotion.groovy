@@ -41,15 +41,7 @@ public abstract class BMotion {
         }
     }
 
-    public void checkObserver(String trigger) {
-        checkObserver(trigger, [])
-    }
-
-    public void checkObserver() {
-        checkObserver(TRIGGER_ANIMATION_CHANGED, [])
-    }
-
-    public abstract Object executeEvent(final data) throws ImpossibleStepException
+    public abstract Object executeEvent(final data)
 
     public Object evaluateFormulas(final d) throws BMotionException {
         def map = [:]
