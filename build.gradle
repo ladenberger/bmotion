@@ -1,0 +1,107 @@
+apply plugin: 'java'
+
+project.version = '0.2.1-SNAPSHOT'
+project.group = 'de.hhu.stups'
+project.archivesBaseName = "bmotion"
+
+project.sourceCompatibility = '1.7'
+project.targetCompatibility = '1.7'
+
+repositories {
+    mavenCentral()
+    maven {
+        name "sonatype snapshots"
+        url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+def jetty_version = '8.1.8.v20121106'
+
+dependencies {
+    compile(group: 'org.slf4j', name: 'slf4j-api', version: '1.7.7')
+    compile(group: 'ch.qos.logback', name: 'logback-core', version: '1.1.2')
+    compile(group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2')
+    compile(group: 'com.corundumstudio.socketio', name: 'netty-socketio', version: '1.7.7')
+    compile(group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.3.0')
+
+    compile(group: 'com.google.code.gson', name: 'gson', version: '1.7.1')
+    compile(group: 'commons-cli', name: 'commons-cli', version: '1.3.1')
+
+    compile(group: 'org.eclipse.jetty', name: 'jetty-io', version: jetty_version)
+    compile(group: 'org.eclipse.jetty', name: 'jetty-server', version: jetty_version)
+    compile(group: 'org.eclipse.jetty', name: 'jetty-util', version: jetty_version)
+}
+
+if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
+
+    apply plugin: 'signing'
+
+    signing {
+        sign configurations.archives
+    }
+
+    task javadocJar(type: Jar) {
+        classifier = 'javadoc'
+        from javadoc
+    }
+
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives javadocJar, sourcesJar
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+
+                pom.project {
+
+                    name 'BMotion Studio Common Server'
+                    packaging 'jar'
+                    // optionally artifactId can be defined here
+                    description "BMotion Studio Common Server"
+                    url 'https://github.com/ladenberger/bmotion'
+
+                    licenses {
+                        license {
+                            name 'Eclipse Public License, Version 1.0'
+                            url 'https://www.eclipse.org/legal/epl-v10.html'
+                        }
+                    }
+
+                    scm {
+                        connection 'scm:git:https://github.com/ladenberger/bmotion.git'
+                        developerConnection 'scm:git:git@github.com:ladenberger/bmotion.git'
+                        url 'https://github.com/ladenberger/bmotion'
+                    }
+
+                    developers {
+                        developer {
+                            id 'ladenberger'
+                            name 'Lukas Ladenberger'
+                            email 'ladenberger@cs.uni-duesseldorf.de'
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+}
