@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'groovy'
 apply plugin: 'maven'
 
 project.version = '0.2.1-SNAPSHOT'
@@ -13,6 +14,21 @@ repositories {
     maven {
         name "sonatype snapshots"
         url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+}
+
+
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['src/main/java']
+        }
+    }
+
+    test {
+        groovy {
+            srcDirs = ['src/test/java']
+        }
     }
 }
 
