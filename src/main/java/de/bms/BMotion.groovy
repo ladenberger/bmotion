@@ -56,11 +56,11 @@ public abstract class BMotion {
      */
     public abstract Object eval(final String formula) throws BMotionException
 
-    public void initSession(String modelPath) {
+    public void initSession(String modelPath) throws BMotionException {
         initModel(modelPath)
     }
 
-    public abstract void initModel(String modelPath)
+    public abstract void initModel(String modelPath) throws BMotionException
 
     public abstract void disconnect();
 
