@@ -22,7 +22,7 @@ appender("FILE", FileAppender) {
 }
 
 logger("de.prob.cli", OFF)
-logger("de.prob.animator", OFF)
+logger("de.prob.animator", ERROR)
 logger("org.eclipse.jetty", ERROR)
 logger("com.corundumstudio.socketio", WARN)
 //root(INFO, ["STDOUT", "FILE"])
