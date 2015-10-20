@@ -26,6 +26,7 @@ public class BMotionSocketServer {
         //config.setHostname("localhost")
         config.setPort(port)
         config.setSocketConfig(socketConfig)
+        config.setMaxFramePayloadLength(64 * 1024 * 100);
         socket = new SocketIOServer(config)
         server.socketListenerProvider?.installListeners(this)
         return socket;
