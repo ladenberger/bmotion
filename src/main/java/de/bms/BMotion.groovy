@@ -56,6 +56,8 @@ public abstract class BMotion {
      */
     public abstract Object eval(final String formula) throws BMotionException
 
+    public abstract Object translate(final String result) throws BMotionException
+
     public void initSession(String modelPath, options) throws BMotionException {
         initModel(modelPath, options)
     }
