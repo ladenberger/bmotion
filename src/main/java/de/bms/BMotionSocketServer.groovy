@@ -38,6 +38,7 @@ public class BMotionSocketServer {
             createSocketIOServer(port).start()
             return true;
         } catch (BindException ex) {
+            log.error ex.getMessage()
             return false;
         }
     }

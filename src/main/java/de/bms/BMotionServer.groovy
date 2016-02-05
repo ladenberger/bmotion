@@ -129,9 +129,10 @@ public class BMotionServer {
             server.setConnectors(connectors);
             connector.setPort(port);
             server.start();
-            return true;
             log.info "Jetty server started on host " + host + " and port " + port
+            return true;
         } catch (BindException ex) {
+            log.error ex.getMessage()
             return false;
         }
     }
@@ -186,7 +187,7 @@ public class BMotionServer {
     }
 
     public void openBrowser() {
-        java.net.URI uri = new java.net.URI("http://" + host + ":" + port + File.separator + visualisation)
+        URI uri = new URI("http://" + host + ":" + port + File.separator + visualisation)
         DesktopApi.browse(uri)
     }
 

@@ -8,15 +8,19 @@ public abstract class BMotion {
 
     def final static String TRIGGER_ANIMATION_CHANGED = "AnimationChanged"
 
-    def String mode = BMotionServer.MODE_INTEGRATED
-
     def final UUID id
 
-    def List<SocketIOClient> clients = []
+    def final List<SocketIOClient> clients = []
+
+    def final BMotionScriptEngineProvider scriptEngineProvider
+
+    def String mode = BMotionServer.MODE_STANDALONE
 
     def clientData = [:]
 
-    def final BMotionScriptEngineProvider scriptEngineProvider
+    public void addClientData(key, value) {
+        clientData[key] = value;
+    }
 
     public BMotion(final UUID id, final BMotionScriptEngineProvider scriptEngineProvider) {
         this.id = id
@@ -28,7 +32,7 @@ public abstract class BMotion {
     }
 
     public void checkObserver(String trigger, Object data) {
-        this.clients.each {
+        clients.each {
             it.sendEvent('checkObserver', trigger, data)
         }
     }
@@ -54,9 +58,9 @@ public abstract class BMotion {
      *         an exception was thrown.
      * @throws BMotionException
      */
-    public abstract Object eval(final String formula) throws BMotionException
+    public abstract Object eval(String formula) throws BMotionException
 
-    public abstract Object translate(final String result) throws BMotionException
+    public abstract Object translate(String result) throws BMotionException
 
     public void initSession(String modelPath, options) throws BMotionException {
         initModel(modelPath, options)

@@ -27,23 +27,6 @@ public class DesktopApi {
         return false;
     }
 
-
-    public static boolean edit(File file) {
-
-        // you can try something like
-        // runCommand("gimp", "%s", file.getPath())
-        // based on user preferences.
-
-        if (openSystemSpecific(file.getPath()))
-            return true;
-
-        if (editDESKTOP(file))
-            return true;
-
-        return false;
-    }
-
-
     private static boolean openSystemSpecific(String what) {
 
         EnumOS os = getOs();
@@ -118,31 +101,6 @@ public class DesktopApi {
         }
     }
 
-
-    private static boolean editDESKTOP(File file) {
-
-        logOut("Trying to use Desktop.getDesktop().edit() with " + file);
-        try {
-            if (!Desktop.isDesktopSupported()) {
-                logErr("Platform is not supported.");
-                return false;
-            }
-
-            if (!Desktop.getDesktop().isSupported(Desktop.Action.EDIT)) {
-                logErr("EDIT is not supported.");
-                return false;
-            }
-
-            Desktop.getDesktop().edit(file);
-
-            return true;
-        } catch (Throwable t) {
-            logErr("Error using desktop edit.", t);
-            return false;
-        }
-    }
-
-
     private static boolean runCommand(String command, String args, String file) {
 
         logOut("Trying to exec:\n   cmd = " + command + "\n   args = " + args + "\n   %s = " + file);
@@ -164,7 +122,7 @@ public class DesktopApi {
                     return false;
                 }
             } catch (IllegalThreadStateException itse) {
-                logErr("Process is running.");
+                logErr("Process is running. " + itse.getMessage());
                 return true;
             }
         } catch (IOException e) {

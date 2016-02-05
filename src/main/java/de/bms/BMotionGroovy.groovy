@@ -6,7 +6,7 @@ public class BMotionGroovy {
                                             "import de.bms.observer.*;",
                                             "import de.bms.itool.*;"];
 
-    public static final String imports = IMPORTS.join("\n")
+    //public static final String imports = IMPORTS.join("\n")
 
 }
 
