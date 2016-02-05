@@ -4,6 +4,6 @@ interface BMotionScriptEngineProvider {
 
     public GroovyShell get()
 
-    //public String[] getImports()
+    public String[] getImports()
 
 }

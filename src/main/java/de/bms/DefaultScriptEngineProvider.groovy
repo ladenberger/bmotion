@@ -7,9 +7,9 @@ public class DefaultScriptEngineProvider implements BMotionScriptEngineProvider 
         return new GroovyShell()
     }
 
-    /*@Override
+    @Override
     public String[] getImports() {
         return []
-    }*/
+    }
 
 }
