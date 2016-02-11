@@ -241,6 +241,7 @@ class CommonSocketListenerProvider implements BMotionSocketListenerProvider {
             throw new BMotionException("No visualisation implementation found for file " + model)
         } else {
             bms.setMode(server.getServer().getMode())
+            bms.getClientData().put("tool", bms.getClass().getSimpleName())
             bms.startSession(options)
             server.getSessions().put(bms.getId().toString(), bms)
             log.info "Created new BMotion session " + bms.getId()
