@@ -16,11 +16,7 @@ public abstract class BMotion {
 
     def String mode = BMotionServer.MODE_STANDALONE
 
-    def clientData = [:]
-
-    public void addClientData(key, value) {
-        clientData[key] = value;
-    }
+    def final clientData = [:]
 
     public BMotion(final UUID id, final BMotionScriptEngineProvider scriptEngineProvider) {
         this.id = id
@@ -62,11 +58,15 @@ public abstract class BMotion {
 
     public abstract Object translate(String result) throws BMotionException
 
-    public void initSession(String modelPath, options) throws BMotionException {
+    public void startSession(String modelPath, options) throws BMotionException {
+        clientData.put("id", id.toString())
         initModel(modelPath, options)
+        initSession(options)
     }
 
-    public abstract void initModel(String modelPath, options) throws BMotionException
+    protected abstract void initSession(options) throws BMotionException
+
+    protected abstract void initModel(String modelPath, options) throws BMotionException
 
     public abstract void disconnect();
 

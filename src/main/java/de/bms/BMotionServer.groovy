@@ -23,7 +23,7 @@ public class BMotionServer {
 
     def BMotionVisualisationProvider visualisationProvider
 
-    def BMotionSocketListenerProvider socketListenerProvider
+    def final socketListenerProvider = []
 
     def SocketServerListener serverStartedListener
 

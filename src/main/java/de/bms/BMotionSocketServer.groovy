@@ -2,6 +2,7 @@ package de.bms
 
 import com.corundumstudio.socketio.Configuration
 import com.corundumstudio.socketio.SocketConfig
+import com.corundumstudio.socketio.SocketIOClient
 import com.corundumstudio.socketio.SocketIOServer
 import com.google.gson.stream.JsonWriter
 import groovy.util.logging.Slf4j
@@ -12,6 +13,9 @@ public class BMotionSocketServer {
     def SocketIOServer socket
     def BMotionServer server
     def boolean standalone = true
+    def final Map<String, BMotion> sessions = new HashMap<String, BMotion>();
+    def final Map<SocketIOClient, String> clients = new HashMap<SocketIOClient, String>();
+    def final Map<String, Thread> sessionThreads = new HashMap<String, Thread>();
 
     public BMotionSocketServer(BMotionServer server) {
         this.server = server
@@ -28,7 +32,10 @@ public class BMotionSocketServer {
         config.setSocketConfig(socketConfig)
         config.setMaxFramePayloadLength(64 * 1024 * 100);
         socket = new SocketIOServer(config)
-        server.socketListenerProvider?.installListeners(this)
+        server.getSocketListenerProvider() << new CommonSocketListenerProvider()
+        server.getSocketListenerProvider().each {
+            it.installListeners(this)
+        }
         return socket;
 
     }
