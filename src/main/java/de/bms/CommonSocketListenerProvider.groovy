@@ -24,7 +24,6 @@ class CommonSocketListenerProvider implements BMotionSocketListenerProvider {
 
                 try {
 
-                    def String tool = d.data.tool
                     def String manifest = d.data.manifest
                     def String modelPath
                     def String model = d.data.model
@@ -47,7 +46,9 @@ class CommonSocketListenerProvider implements BMotionSocketListenerProvider {
                             modelPath = templateFolder + File.separator + model
                         }
                     }
-                    bms = initSession(server, modelPath, tool, options)
+
+                    options.model = modelPath
+                    bms = initSession(server, options)
                     bms.getClientData().put('templateFolder', templateFolder)
 
                     if (ackRequest.isAckRequested()) {
@@ -69,7 +70,7 @@ class CommonSocketListenerProvider implements BMotionSocketListenerProvider {
                 def BMotion bms = server.getSessions().get((String) d.data['id'])
                 if (bms != null) {
                     def sessionId = bms.getId().toString()
-                    bms.clients.add(client)
+                    bms.getClients().add(client)
                     def sessionThread = server.getSessionThreads().get(sessionId)
                     if (sessionThread != null) {
                         sessionThread.interrupt()
@@ -212,7 +213,7 @@ class CommonSocketListenerProvider implements BMotionSocketListenerProvider {
                 public void run() {
                     try {
                         Thread.sleep(sessionWaitTime);
-                        if (bms.clients.isEmpty()) {
+                        if (bms.getClients().isEmpty()) {
                             log.info("Remove session " + bms.getId())
                             bms.disconnect()
                             server.getSessionThreads().remove(sessionId)
@@ -232,34 +233,20 @@ class CommonSocketListenerProvider implements BMotionSocketListenerProvider {
     }
 
     private
-    static BMotion initSession(BMotionSocketServer server, String modelPath, String tool, options) throws BMotionException {
+    static BMotion initSession(BMotionSocketServer server, options) throws BMotionException {
 
-        def String sessionId = UUID.randomUUID() // The id should come from the client!
-        def BMotion bms = createSession(sessionId, tool, server.getServer().getVisualisationProvider());
-        if (bms != null) {
+        def BMotion bms = server.getServer().getVisualisationProvider().get(options)
+        if (bms == null) {
+            def String model = options['model']
+            throw new BMotionException("No visualisation implementation found for file " + model)
+        } else {
             bms.setMode(server.getServer().getMode())
-            bms.startSession(modelPath, options)
-            server.getSessions().put(sessionId, bms)
-            log.info "Created new BMotion session " + sessionId
-            return bms
-        } else {
-            throw new BMotionException("BMotion Studio session could not be initialised!")
+            bms.startSession(options)
+            server.getSessions().put(bms.getId().toString(), bms)
+            log.info "Created new BMotion session " + bms.getId()
+            return bms;
         }
 
-    }
-
-    private
-    static BMotion createSession(String id, String tool, BMotionVisualisationProvider visualisationProvider) throws BMotionException {
-        if (tool != null) {
-            def visualisation = visualisationProvider.get(id, tool)
-            if (visualisation == null) {
-                throw new BMotionException("No visualisation implementation found for " + tool)
-            } else {
-                return visualisation;
-            }
-        } else {
-            throw new BMotionException("Please specify a tool in bmotion.json (e.g. BAnimation or CSPAnimation)")
-        }
     }
 
 }

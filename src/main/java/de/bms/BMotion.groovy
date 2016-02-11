@@ -58,15 +58,15 @@ public abstract class BMotion {
 
     public abstract Object translate(String result) throws BMotionException
 
-    public void startSession(String modelPath, options) throws BMotionException {
+    public void startSession(options) throws BMotionException {
         clientData.put("id", id.toString())
-        initModel(modelPath, options)
+        initModel(options)
         initSession(options)
     }
 
-    protected abstract void initSession(options) throws BMotionException
+    protected abstract void initModel(options) throws BMotionException
 
-    protected abstract void initModel(String modelPath, options) throws BMotionException
+    protected abstract void initSession(options) throws BMotionException
 
     public abstract void disconnect();
 
