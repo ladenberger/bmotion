@@ -1,1 +1,3 @@
-This repository is obsolete! Please check out the new repository: https://github.com/ladenberger/bmotion-server
+# BMotionWeb Server Core Module
+
+[![Build Status](https://travis-ci.org/ladenberger/bmotion.svg?branch=develop)](https://travis-ci.org/ladenberger/bmotion)
