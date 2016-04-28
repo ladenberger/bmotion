@@ -1,3 +1,1 @@
-# BMotion Studio Common Server
-
-[![Build Status](https://travis-ci.org/ladenberger/bmotion.svg?branch=develop)](https://travis-ci.org/ladenberger/bmotion)
+This repository is obsolete! Please check out the new repository: https://github.com/ladenberger/bmotion-server
