@@ -1,13 +1,13 @@
 apply plugin: 'java'
-apply plugin: 'groovy'
 apply plugin: 'maven'
+apply plugin: 'eclipse'
 
-project.version = '0.2.8'
+project.version = '0.3.0-SNAPSHOT'
 project.group = 'de.hhu.stups'
 project.archivesBaseName = "bmotion"
 
-project.sourceCompatibility = '1.7'
-project.targetCompatibility = '1.7'
+project.sourceCompatibility = '1.8'
+project.targetCompatibility = '1.8'
 
 repositories {
     mavenCentral()
@@ -21,21 +21,6 @@ repositories {
     }
 }
 
-
-sourceSets {
-    main {
-        groovy {
-            srcDirs = ['src/main/java']
-        }
-    }
-
-    test {
-        groovy {
-            srcDirs = ['src/test/java']
-        }
-    }
-}
-
 configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
@@ -43,6 +28,7 @@ configurations.all {
 def jetty_version = '8.1.8.v20121106'
 
 dependencies {
+
     compile(group: 'org.slf4j', name: 'slf4j-api', version: '1.7.7')
     compile(group: 'ch.qos.logback', name: 'logback-core', version: '1.1.2')
     compile(group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2')
@@ -55,6 +41,23 @@ dependencies {
     compile(group: 'org.eclipse.jetty', name: 'jetty-io', version: jetty_version)
     compile(group: 'org.eclipse.jetty', name: 'jetty-server', version: jetty_version)
     compile(group: 'org.eclipse.jetty', name: 'jetty-util', version: jetty_version)
+    
+    testCompile(group: 'junit', name: 'junit', version: '4.+')
+    
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+    }
+
+    test {
+        java {
+            srcDirs = ['src/test/java']
+        }
+    }
 }
 
 if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
@@ -94,10 +97,10 @@ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')
 
                 pom.project {
 
-                    name 'BMotion Studio Common Server'
+                    name 'BMotionWeb Server Common Module'
                     packaging 'jar'
                     // optionally artifactId can be defined here
-                    description "BMotion Studio Common Server"
+                    description "BMotionWeb Server Common Module"
                     url 'https://github.com/ladenberger/bmotion'
 
                     licenses {
