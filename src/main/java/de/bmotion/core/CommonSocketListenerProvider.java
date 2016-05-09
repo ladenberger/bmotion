@@ -38,19 +38,23 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 
 						try {
 
-							// Destroy old client session (if exists)
-							String oldSessionId = server.getClients().get(client);
-							if (oldSessionId != null) {
-								BMotion oldBmsVisualization = server.getSessions().get(oldSessionId);
-								if (oldBmsVisualization != null) {
-									oldBmsVisualization.disconnect();
-								}
+							// Destroy/disconnect old client session (if exists)
+							BMotion oldBmsVisualization = server.getSessions().get(server.getClients().get(client));
+							if (oldBmsVisualization != null) {
+								oldBmsVisualization.disconnect();
 							}
 
+							// Initialize new session
 							BMotion bms = InitSessionService.initSession(server, initSesionObject.getSessionId(),
 									initSesionObject.getModelPath(), initSesionObject.getOptions());
 							bms.getSessionData().put("manifestFilePath", initSesionObject.getManifestFilePath());
-							ackRequest.sendAckData(bms.getId().toString());
+							bms.getClients().add(client);
+							server.getClients().put(client, bms.getId());
+
+							// Send session data to client
+							if (ackRequest.isAckRequested()) {
+								ackRequest.sendAckData(bms.getSessionData(), bms.getToolData());
+							}
 
 						} catch (BMotionException e) {
 							ackRequest.sendAckData(new ErrorObject(e.getMessage()));
@@ -192,7 +196,7 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 					Thread.sleep(waitTime);
 					log.info("Check if still no clients exist");
 					if (server.getSocket().getAllClients().isEmpty()) {
-						log.info("Close BMotion Studio for ProB server process");
+						log.info("Close BMotionWeb server process");
 						System.exit(-1);
 					}
 				} catch (InterruptedException e) {
