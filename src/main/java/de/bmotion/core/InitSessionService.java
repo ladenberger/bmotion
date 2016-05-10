@@ -50,7 +50,7 @@ public class InitSessionService {
 			bms.getSessionData().put("tool", bms.getClass().getSimpleName());
 			// bms.getClientData().put("templateFolder", templateFolder);
 			bms.getSessionData().put("modelPath", fModelPath);
-			server.getSessions().put(bms.getId().toString(), bms);
+			server.getSessions().put(bms.getId(), bms);
 			bms.initModel(fModelPath, options);
 			log.info("Created new BMotion session " + bms.getId());
 			return bms;

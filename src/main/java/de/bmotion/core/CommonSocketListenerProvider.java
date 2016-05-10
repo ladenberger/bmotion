@@ -38,12 +38,6 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 
 						try {
 
-							// Destroy/disconnect old client session (if exists)
-							BMotion oldBmsVisualization = server.getSessions().get(server.getClients().get(client));
-							if (oldBmsVisualization != null) {
-								oldBmsVisualization.disconnect();
-							}
-
 							// Initialize new session
 							BMotion bms = InitSessionService.initSession(server, initSesionObject.getSessionId(),
 									initSesionObject.getModelPath(), initSesionObject.getOptions());
@@ -68,13 +62,17 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 			public void onData(final SocketIOClient client, String sessionId, final AckRequest ackRequest) {
 				BMotion bms = server.getSessions().get(sessionId);
 				if (bms != null) {
-					bms.getClients().add(client);
+					// Add client only if not exists
+					if (!bms.getClients().contains(client)) {						
+						bms.getClients().add(client);
+					}
 					Thread sessionThread = sessionThreads.get(sessionId.toString());
 					if (sessionThread != null) {
 						sessionThread.interrupt();
 						sessionThreads.remove(sessionId);
 					}
 					server.getClients().put(client, sessionId);
+					server.getSessions().put(sessionId, bms);
 					if (ackRequest.isAckRequested()) {
 						ackRequest.sendAckData(bms.getSessionData(), bms.getToolData());
 					}
@@ -156,17 +154,13 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 				BMotion bms = server.getSessions().get(id);
 				if (bms != null) {
 
-					// sessions.remove(id)
 					server.getClients().remove(client);
 					bms.getClients().remove(client);
-					// bms.disconnect();
 
 					if (bms.getClients().isEmpty()) {
 						startSessionTimer(server, bms);
 					}
-
 				}
-
 				// In standalone mode exit server when no client exists
 				if (server.getServer().getMode() == BMotionServer.MODE_STANDALONE) {
 					boolean isEmptyClient = server.getSocket().getAllClients().isEmpty();
@@ -184,9 +178,6 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 	private void startTimer(BMotionSocketServer server) {
 
 		log.info("Going to start timer thread");
-		// ExecutorService singleThreadExecutor =
-		// Executors.newSingleThreadExecutor();
-		// singleThreadExecutor.execute();
 
 		exitThread = new Thread(new Runnable() {
 			@Override
@@ -207,16 +198,12 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 			}
 		});
 		exitThread.start();
-		// log.info("Is alive? " + exitThread.isAlive().toString())
 
 	}
 
 	private void startSessionTimer(BMotionSocketServer server, BMotion bms) {
 
 		log.info("Going to start session timer thread");
-		// ExecutorService singleThreadExecutor =
-		// Executors.newSingleThreadExecutor();
-		// singleThreadExecutor.execute();
 
 		String sessionId = bms.getId().toString();
 		Thread sessionThread = sessionThreads.get(sessionId);
