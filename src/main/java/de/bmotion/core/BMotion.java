@@ -46,10 +46,17 @@ public abstract class BMotion {
 	}
 
 	public Object executeEvent(String name) throws BMotionException {
-		return executeEvent(name, Collections.emptyMap());
+		HashMap<String, String> options = new HashMap<String, String>();
+		options.put("name", name);
+		return executeEvent(options);
 	}
 
-	public abstract Object executeEvent(String name, Map<String, String> options) throws BMotionException;
+	public Object executeEvent(String name, Map<String, String> options) throws BMotionException {
+		options.put("name", name);
+		return executeEvent(options);
+	}
+
+	public abstract Object executeEvent(Map<String, String> options) throws BMotionException;
 
 	public Map<String, Map<String, Object>> evaluateFormulas(Map<String, FormulaListObject> oList)
 			throws BMotionException {

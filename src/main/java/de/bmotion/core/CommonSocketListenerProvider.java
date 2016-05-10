@@ -105,7 +105,7 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 						BMotion bms = server.getSessions().get(event.getSessionId());
 						if (bms != null) {
 							try {
-								Object returnObject = bms.executeEvent(event.getName(), event.getOptions());
+								Object returnObject = bms.executeEvent(event.getOptions());
 								ackRequest.sendAckData(returnObject);
 							} catch (BMotionException e) {
 								ackRequest.sendAckData(new ErrorObject(e.getMessage()));

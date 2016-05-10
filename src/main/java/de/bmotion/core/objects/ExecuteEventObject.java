@@ -6,8 +6,6 @@ public class ExecuteEventObject {
 
 	private String sessionId;
 
-	private String name;
-
 	private Map<String, String> options;
 
 	public ExecuteEventObject() {
@@ -16,7 +14,6 @@ public class ExecuteEventObject {
 	public ExecuteEventObject(String sessionId, String name, Map<String, String> options) {
 		super();
 		this.sessionId = sessionId;
-		this.name = name;
 		this.options = options;
 	}
 
@@ -26,14 +23,6 @@ public class ExecuteEventObject {
 
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public Map<String, String> getOptions() {
