@@ -1,6 +1,7 @@
 package de.bmotion.core;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -40,6 +41,10 @@ public class InitSessionService {
 
 		if (System.getProperty("os.name").toLowerCase().indexOf("win") >= 0) {
 			modelPath = modelPath.replace("\\", "\\\\");
+		}
+
+		if (options == null) {
+			options = Collections.emptyMap();
 		}
 
 		BMotion bms = visualisationProvider.get(sessionId, modelPath, options);
