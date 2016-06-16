@@ -113,5 +113,8 @@ public abstract class BMotion {
 	public Map<String, Object> getToolData() {
 		return toolData;
 	}
+	
+	public void sessionLoaded() {		
+	}
 
 }

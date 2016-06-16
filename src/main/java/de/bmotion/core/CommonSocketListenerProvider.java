@@ -71,6 +71,7 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 						sessionThread.interrupt();
 						sessionThreads.remove(sessionId);
 					}
+					bms.sessionLoaded();
 					server.getClients().put(client, sessionId);
 					server.getSessions().put(sessionId, bms);
 					if (ackRequest.isAckRequested()) {
