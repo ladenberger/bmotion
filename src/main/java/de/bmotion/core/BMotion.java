@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import com.corundumstudio.socketio.SocketIOClient;
 
 import de.bmotion.core.objects.FormulaListObject;
+import de.bmotion.core.objects.FormulaReturnObject;
 
 public abstract class BMotion {
 
@@ -64,15 +65,17 @@ public abstract class BMotion {
 		return oList.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> {
 
 			FormulaListObject list = (FormulaListObject) entry.getValue();
-			return list.getFormulas().stream().collect(Collectors.toMap(obj -> obj.getFormula(), obj -> {
-
-				try {
-					return eval(obj.getFormula(), obj.getOptions());
-				} catch (BMotionException e) {
-					return "";
-				}
-
-			}));
+			Map<String, Object> collect = list.getFormulas().stream()
+					.collect(Collectors.toMap(obj -> obj.getFormula(), obj -> {
+						FormulaReturnObject returnObj = new FormulaReturnObject();
+						try {
+							returnObj.setResult(eval(obj.getFormula(), obj.getOptions()));
+						} catch (BMotionException e) {
+							returnObj.setError(e.getMessage());
+						}
+						return returnObj;
+					}));
+			return collect;
 
 		}));
 
@@ -113,8 +116,8 @@ public abstract class BMotion {
 	public Map<String, Object> getToolData() {
 		return toolData;
 	}
-	
-	public void sessionLoaded() {		
+
+	public void sessionLoaded() {
 	}
 
 }
