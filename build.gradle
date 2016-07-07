@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
 
-project.version = '0.3.0-SNAPSHOT'
+project.version = '0.3.0'
 project.group = 'de.hhu.stups'
 project.archivesBaseName = "bmotion"
 
