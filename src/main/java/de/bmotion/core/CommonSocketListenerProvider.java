@@ -63,7 +63,7 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 				BMotion bms = server.getSessions().get(sessionId);
 				if (bms != null) {
 					// Add client only if not exists
-					if (!bms.getClients().contains(client)) {						
+					if (!bms.getClients().contains(client)) {
 						bms.getClients().add(client);
 					}
 					Thread sessionThread = sessionThreads.get(sessionId.toString());
@@ -163,44 +163,37 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 					}
 				}
 				// In standalone mode exit server when no client exists
-				if (server.getServer().getMode() == BMotionServer.MODE_STANDALONE) {
-					boolean isEmptyClient = server.getSocket().getAllClients().isEmpty();
-					log.info("Check if no clients exist " + isEmptyClient);
-					if (server.getSocket().getAllClients().isEmpty()) {
-						startTimer(server);
-					}
-				}
+				/*
+				 * if (server.getServer().getMode() ==
+				 * BMotionServer.MODE_STANDALONE) { boolean isEmptyClient =
+				 * server.getSocket().getAllClients().isEmpty(); log.info(
+				 * "Check if no clients exist " + isEmptyClient); if
+				 * (server.getSocket().getAllClients().isEmpty()) {
+				 * startTimer(server); } }
+				 */
 
 			}
 		});
 
 	}
 
-	private void startTimer(BMotionSocketServer server) {
-
-		log.info("Going to start timer thread");
-
-		exitThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				log.info("Timer thread started");
-				try {
-					Thread.sleep(waitTime);
-					log.info("Check if still no clients exist");
-					if (server.getSocket().getAllClients().isEmpty()) {
-						log.info("Close BMotionWeb server process");
-						System.exit(-1);
-					}
-				} catch (InterruptedException e) {
-					log.info("Timer thread interrupted " + e.getMessage());
-				} finally {
-					log.info("Exit timer thread");
-				}
-			}
-		});
-		exitThread.start();
-
-	}
+	/*
+	 * private void startTimer(BMotionSocketServer server) {
+	 * 
+	 * log.info("Going to start timer thread");
+	 * 
+	 * exitThread = new Thread(new Runnable() {
+	 * 
+	 * @Override public void run() { log.info("Timer thread started"); try {
+	 * Thread.sleep(waitTime); log.info("Check if still no clients exist"); if
+	 * (server.getSocket().getAllClients().isEmpty()) { log.info(
+	 * "Close BMotionWeb server process"); System.exit(-1); } } catch
+	 * (InterruptedException e) { log.info("Timer thread interrupted " +
+	 * e.getMessage()); } finally { log.info("Exit timer thread"); } } });
+	 * exitThread.start();
+	 * 
+	 * }
+	 */
 
 	private void startSessionTimer(BMotionSocketServer server, BMotion bms) {
 
