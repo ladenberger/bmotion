@@ -1,5 +1,6 @@
 package de.bmotion.core;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.MalformedURLException;
@@ -182,13 +183,16 @@ public class BMotionServer {
 		s.add(Resource.newResource(this.workspacePath));
 		resourcePaths.forEach(r -> {
 			try {
-				s.add(Resource.newResource(resourceResolver.resolve(r)));
+				//s.add(Resource.newResource(resourceResolver.resolve(r)));
+				File file = new File(r.toURI());
+				s.add(Resource.newResource(file.getAbsolutePath()));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		});
 		ResourceCollection resources = new ResourceCollection(s.toArray(new Resource[s.size()]));
 		resHandler.setBaseResource(resources);
+		//resHandler.setResourceBase("/");
 		resHandler.setCacheControl("no-cache");
 		resHandler.setDirectoriesListed(true);
 		context.setHandler(resHandler);
