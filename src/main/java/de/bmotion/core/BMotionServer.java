@@ -1,6 +1,8 @@
 package de.bmotion.core;
 
+import java.io.IOException;
 import java.net.BindException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +16,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.resource.ResourceCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,14 +39,13 @@ public class BMotionServer {
 
 	private final List<ISocketServerListener> serverStartedListener = new ArrayList<ISocketServerListener>();
 
-	// private URL[] resourcePaths;
-
 	private BMotionSocketServer socketServer;
 
 	private CommandLine cmdLine;
 
-	// private IResourceResolver resourceResolver = new
-	// DefaultResourceResolver();
+	// private URL[] resourcePaths;
+
+	private IResourceResolver resourceResolver = new DefaultResourceResolver();
 
 	private final Options options = new Options();
 
@@ -171,16 +174,15 @@ public class BMotionServer {
 		}
 	}
 
-	private ContextHandler setupWorkspaceHandler() {
+	private ContextHandler setupWorkspaceHandler() throws MalformedURLException, IOException {
 		ContextHandler context = new ContextHandler();
 		// context.setContextPath("/");
 		ResourceHandler resHandler = new ResourceHandler();
-		// Resource[] s = new Resource[] { Resource.newResource(workspacePath)
-		// };
-		// Resource[] s = resourcePaths.map( r ->
+		Resource[] s = new Resource[] { Resource.newResource(workspacePath) };
+		// Resource[] s = resourcePaths.map(r ->
 		// Resource.newResource(resourceResolver.resolve(r)));
-		// ResourceCollection resources = new ResourceCollection(s);
-		// resHandler.setBaseResource(resources);
+		ResourceCollection resources = new ResourceCollection(s);
+		resHandler.setBaseResource(resources);
 		resHandler.setCacheControl("no-cache");
 		resHandler.setDirectoriesListed(true);
 		context.setHandler(resHandler);
@@ -223,6 +225,14 @@ public class BMotionServer {
 
 	public BMotionSocketServer getSocketServer() {
 		return socketServer;
+	}
+
+	public IResourceResolver getResourceResolver() {
+		return resourceResolver;
+	}
+
+	public void setResourceResolver(IResourceResolver resourceResolver) {
+		this.resourceResolver = resourceResolver;
 	}
 
 }
