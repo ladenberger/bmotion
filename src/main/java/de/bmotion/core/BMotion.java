@@ -97,7 +97,11 @@ public abstract class BMotion {
 		return eval(formula, Collections.emptyMap());
 	}
 
-	public abstract void initModel(String model, Map<String, String> options) throws BMotionException;
+	public abstract void initModel(String model, Map<String, String> options, String mode) throws BMotionException;
+
+	public void initModel(String model, Map<String, String> options) throws BMotionException {
+		initModel(model, options, BMotionServer.MODE_STANDALONE);
+	};
 
 	public abstract void disconnect();
 

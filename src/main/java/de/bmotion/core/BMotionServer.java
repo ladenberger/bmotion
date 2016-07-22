@@ -31,7 +31,7 @@ public class BMotionServer {
 	public final static String MODE_STANDALONE = "ModeStandalone";
 	public final static String MODE_ONLINE = "ModeOnline";
 
-	private String mode = MODE_INTEGRATED;
+	private String mode = MODE_STANDALONE;
 
 	private String workspacePath;
 
