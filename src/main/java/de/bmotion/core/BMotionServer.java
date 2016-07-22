@@ -3,6 +3,7 @@ package de.bmotion.core;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public class BMotionServer {
 
 	private CommandLine cmdLine;
 
-	// private URL[] resourcePaths;
+	private final List<URL> resourcePaths = new ArrayList<URL>();
 
 	private IResourceResolver resourceResolver = new DefaultResourceResolver();
 
@@ -109,10 +110,9 @@ public class BMotionServer {
 
 	}
 
-	/*
-	 * public void setResourcePaths(URL[] resourcePaths) { this.resourcePaths =
-	 * resourcePaths; }
-	 */
+	public void addResourcePath(URL url) {
+		this.resourcePaths.add(url);
+	}
 
 	public void start() throws BMotionException {
 		startBMotionSocketServer();
@@ -178,10 +178,16 @@ public class BMotionServer {
 		ContextHandler context = new ContextHandler();
 		// context.setContextPath("/");
 		ResourceHandler resHandler = new ResourceHandler();
-		Resource[] s = new Resource[] { Resource.newResource(workspacePath) };
-		// Resource[] s = resourcePaths.map(r ->
-		// Resource.newResource(resourceResolver.resolve(r)));
-		ResourceCollection resources = new ResourceCollection(s);
+		List<Resource> s = new ArrayList<Resource>();
+		s.add(Resource.newResource(this.workspacePath));
+		resourcePaths.forEach(r -> {
+			try {
+				s.add(Resource.newResource(resourceResolver.resolve(r)));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+		ResourceCollection resources = new ResourceCollection(s.toArray(new Resource[s.size()]));
 		resHandler.setBaseResource(resources);
 		resHandler.setCacheControl("no-cache");
 		resHandler.setDirectoriesListed(true);
