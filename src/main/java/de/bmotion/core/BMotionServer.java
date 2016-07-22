@@ -49,7 +49,7 @@ public class BMotionServer {
 
 	private final Options options = new Options();
 
-	private int port = 18080;
+	private int jettyPort = 18080;
 	private boolean customPort = false;
 	private int socketPort = 19090;
 	private boolean customSocketPort = false;
@@ -96,7 +96,7 @@ public class BMotionServer {
 			this.host = cmdLine.getOptionValue("host");
 		}
 		if (cmdLine.hasOption("port")) {
-			this.port = Integer.parseInt(cmdLine.getOptionValue("port"));
+			this.jettyPort = Integer.parseInt(cmdLine.getOptionValue("port"));
 			this.customPort = true;
 		}
 		if (cmdLine.hasOption("socketHost")) {
@@ -152,15 +152,15 @@ public class BMotionServer {
 		server.setHandler(setupWorkspaceHandler());
 		boolean found = false;
 		if (customPort) {
-			if (connectBMotionJettyServer(server, port)) {
+			if (connectBMotionJettyServer(server, jettyPort)) {
 				found = true;
 			}
 		} else {
-			while (!found && port < 18180) {
-				if (connectBMotionJettyServer(server, port)) {
+			while (!found && jettyPort < 18180) {
+				if (connectBMotionJettyServer(server, jettyPort)) {
 					found = true;
 				} else {
-					port++;
+					jettyPort++;
 				}
 			}
 			if (!found) {
@@ -168,9 +168,9 @@ public class BMotionServer {
 			}
 		}
 		if (found) {
-			log.info("Jetty server started on host " + host + " and port " + port);
+			log.info("Jetty server started on host " + host + " and port " + jettyPort);
 		} else {
-			log.error("Jetty server cannot be started on host " + host + " and port " + port + " (port is used).");
+			log.error("Jetty server cannot be started on host " + host + " and port " + jettyPort + " (port is used).");
 		}
 	}
 
@@ -233,6 +233,10 @@ public class BMotionServer {
 
 	public void setResourceResolver(IResourceResolver resourceResolver) {
 		this.resourceResolver = resourceResolver;
+	}
+
+	public int getJettyPort() {
+		return jettyPort;
 	}
 
 }
