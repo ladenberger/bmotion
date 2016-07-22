@@ -176,7 +176,7 @@ public class BMotionServer {
 
 	private ContextHandler setupWorkspaceHandler() throws MalformedURLException, IOException {
 		ContextHandler context = new ContextHandler();
-		context.setContextPath("/");
+		//context.setContextPath("/");
 		ResourceHandler resHandler = new ResourceHandler();
 		List<Resource> s = new ArrayList<Resource>();
 		s.add(Resource.newResource(this.workspacePath));
