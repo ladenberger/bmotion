@@ -12,6 +12,7 @@ import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 
+import de.bmotion.core.objects.CallMethodObject;
 import de.bmotion.core.objects.ErrorObject;
 import de.bmotion.core.objects.ExecuteEventObject;
 import de.bmotion.core.objects.InitSessionObject;
@@ -40,7 +41,8 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 
 							// Initialize new session
 							BMotion bms = InitSessionService.initSession(server, initSesionObject.getSessionId(),
-									initSesionObject.getModelPath(), initSesionObject.getOptions());
+									initSesionObject.getModelPath(), initSesionObject.getGroovyPath(),
+									initSesionObject.getOptions());
 							bms.getSessionData().put("manifestFilePath", initSesionObject.getManifestFilePath());
 							bms.getClients().add(client);
 							server.getClients().put(client, bms.getId());
@@ -116,6 +118,26 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 
 					}
 				});
+
+		server.getSocket().addEventListener("callMethod", CallMethodObject.class, new DataListener<CallMethodObject>() {
+			@Override
+			public void onData(final SocketIOClient client, CallMethodObject method, final AckRequest ackRequest) {
+
+				BMotion bms = server.getSessions().get(method.getSessionId());
+				if (bms != null) {
+					try {
+						Object returnObject = bms.callMethod(method.getName(), method.getArguments());
+						ackRequest.sendAckData(returnObject);
+					} catch (BMotionException e) {
+						ackRequest.sendAckData(new ErrorObject(e.getMessage()));
+					}
+				} else {
+					ackRequest.sendAckData(
+							new ErrorObject("Session with id " + method.getSessionId() + " does not exists!"));
+				}
+
+			}
+		});
 
 		server.getSocket().addEventListener("evaluateFormulas", ObserverFormulaListObject.class,
 				new DataListener<ObserverFormulaListObject>() {

@@ -12,6 +12,8 @@ import com.corundumstudio.socketio.SocketIOClient;
 
 import de.bmotion.core.objects.FormulaListObject;
 import de.bmotion.core.objects.FormulaReturnObject;
+import groovy.lang.Closure;
+import groovy.lang.GroovyRuntimeException;
 
 public abstract class BMotion {
 
@@ -27,6 +29,8 @@ public abstract class BMotion {
 
 	public final Map<String, Object> sessionData = new HashMap<String, Object>();
 	public final Map<String, Object> toolData = new HashMap<String, Object>();
+
+	public final Map<String, Closure<?>> methods = new HashMap<String, Closure<?>>();
 
 	public BMotion(String sessionId, final IBMotionScriptEngineProvider scriptEngineProvider) {
 		this.id = sessionId;
@@ -97,13 +101,34 @@ public abstract class BMotion {
 		return eval(formula, Collections.emptyMap());
 	}
 
-	public abstract void initModel(String model, Map<String, String> options, String mode) throws BMotionException;
+	public void initGroovyScript(String groovyPath) throws BMotionException {
+		scriptEngineProvider.load(groovyPath, this);
+	}
 
-	public void initModel(String model, Map<String, String> options) throws BMotionException {
-		initModel(model, options, BMotionServer.MODE_STANDALONE);
-	};
+	public abstract void initModel(String model, Map<String, String> modelOptions, String mode) throws BMotionException;
+
+	public void initModel(String model, Map<String, String> modelOptions) throws BMotionException {
+		initModel(model, modelOptions, BMotionServer.MODE_STANDALONE);
+	}
 
 	public abstract void disconnect();
+
+	public void registerMethod(String name, Closure<?> func) {
+		methods.put(name, func);
+	}
+
+	public Object callMethod(String name, Object... args) throws BMotionException {
+		Closure<?> func = methods.get(name);
+		if (func == null) {
+			throw new BMotionException("Cannot call method " + name + ": No such method.");
+		}
+		try {
+			return func.call(args);
+		} catch (GroovyRuntimeException e) {
+			throw new BMotionException(
+					"Some error occurred while executing method " + name + ": " + e.getMessage() + ".");
+		}
+	}
 
 	public Map<String, Object> getSessionData() {
 		return sessionData;
@@ -122,6 +147,10 @@ public abstract class BMotion {
 	}
 
 	public void sessionLoaded() {
+	}
+
+	public Map<String, Closure<?>> getMethods() {
+		return methods;
 	}
 
 }

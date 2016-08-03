@@ -5,7 +5,7 @@ import groovy.lang.GroovyShell;
 public class DefaultScriptEngineProvider implements IBMotionScriptEngineProvider {
 
 	@Override
-	public GroovyShell get() {
+	public GroovyShell load(String groovyPath, BMotion session) {
 		return new GroovyShell();
 	}
 

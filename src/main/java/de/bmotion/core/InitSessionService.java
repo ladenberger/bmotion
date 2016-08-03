@@ -11,55 +11,58 @@ public class InitSessionService {
 
 	private final static Logger log = LoggerFactory.getLogger(InitSessionService.class);
 
-	public static BMotion initSession(BMotionSocketServer server, String sessionId, String modelPath,
-			Map<String, String> options) throws BMotionException {
+	public static BMotion initSession(BMotionSocketServer server, String sessionId, String modelPath, String groovyPath,
+			Map<String, String> modelOptions) throws BMotionException {
 
 		IBMotionVisualizationProvider visualisationProvider = server.getServer().getVisualisationProvider();
 		if (visualisationProvider == null) {
 			throw new BMotionException("No visualistaion provider installed.");
 		}
 
-		// String templateFolder = initSesionObject.getManifest() != null
-		// ? new File(initSesionObject.getManifest()).getParent().toString() :
-		// "";
-
-		// Get correct path to model
-		String fModelPath;
-		if (BMotionServer.MODE_ONLINE.equals(server.getServer().getMode())) {
-			// modelPath = server.getServer().getWorkspacePath() +
-			// File.separator + templateFolder + File.separator
-			// + initSesionObject.getModel();
-			fModelPath = server.getServer().getWorkspacePath() + File.separator + modelPath;
-		} else {
-			// if (new File(initSesionObject.getModelPath()).isAbsolute()) {
-			fModelPath = modelPath;
-			// } else {
-			// modelPath = templateFolder + File.separator +
-			// initSesionObject.getModel();
-			// }
+		if (modelPath == null) {
+			throw new BMotionException("Model path must be not null.");
 		}
 
-		if (System.getProperty("os.name").toLowerCase().indexOf("win") >= 0) {
-			modelPath = modelPath.replace("\\", "\\\\");
+		if (modelOptions == null) {
+			modelOptions = Collections.emptyMap();
 		}
 
-		if (options == null) {
-			options = Collections.emptyMap();
-		}
+		String fModelPath = getCorrectPath(server, modelPath);
 
-		BMotion bms = visualisationProvider.get(sessionId, modelPath, options);
+		BMotion bms = visualisationProvider.get(sessionId, fModelPath, modelOptions);
 		if (bms == null) {
-			throw new BMotionException("No visualisation implementation found for " + modelPath);
+			throw new BMotionException("No visualisation implementation found for " + fModelPath);
 		} else {
-			// bms.setMode(server.getServer().getMode());
 			bms.getSessionData().put("tool", bms.getClass().getSimpleName());
-			// bms.getClientData().put("templateFolder", templateFolder);
 			bms.getSessionData().put("modelPath", fModelPath);
 			server.getSessions().put(bms.getId(), bms);
-			bms.initModel(fModelPath, options, server.getServer().getMode());
+			bms.initModel(fModelPath, modelOptions, server.getServer().getMode());
+
+			if (groovyPath != null) {
+				String fGroovyPath = getCorrectPath(server, groovyPath);
+				bms.getSessionData().put("groovyPath", fGroovyPath);
+				bms.initGroovyScript(fGroovyPath);
+			}
+
 			log.info("Created new BMotion session " + bms.getId());
 			return bms;
 		}
+
+	}
+
+	private static String getCorrectPath(BMotionSocketServer server, String path) {
+
+		String fpath = path;
+		if (BMotionServer.MODE_ONLINE.equals(server.getServer().getMode())) {
+			fpath = server.getServer().getWorkspacePath() + File.separator + path;
+		}
+
+		// Workaround for windows paths
+		if (System.getProperty("os.name").toLowerCase().indexOf("win") >= 0) {
+			fpath = fpath.replace("\\", "\\\\");
+		}
+
+		return fpath;
 
 	}
 

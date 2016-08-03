@@ -7,16 +7,18 @@ public class InitSessionObject {
 	private String sessionId;
 	private String manifestFilePath;
 	private String modelPath;
+	private String groovyPath;
 	private Map<String, String> options;
 
 	public InitSessionObject() {
 	}
 
-	public InitSessionObject(String sessionId, String manifestFilePath, String modelPath, Map<String, String> options) {
+	public InitSessionObject(String sessionId, String manifestFilePath, String modelPath, String groovyPath, Map<String, String> options) {
 		super();
 		this.sessionId = sessionId;
 		this.manifestFilePath = manifestFilePath;
 		this.modelPath = modelPath;
+		this.groovyPath = groovyPath;
 		this.options = options;
 	}
 
@@ -50,6 +52,14 @@ public class InitSessionObject {
 
 	public void setManifestFilePath(String manifestFilePath) {
 		this.manifestFilePath = manifestFilePath;
+	}
+
+	public String getGroovyPath() {
+		return groovyPath;
+	}
+
+	public void setGroovyPath(String groovyPath) {
+		this.groovyPath = groovyPath;
 	}
 
 }
