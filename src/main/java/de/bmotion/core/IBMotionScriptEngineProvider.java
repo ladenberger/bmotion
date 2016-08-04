@@ -4,8 +4,8 @@ import groovy.lang.GroovyShell;
 
 public interface IBMotionScriptEngineProvider {
 
-    public GroovyShell load(String groovyPath, BMotion session) throws BMotionException;
+	public GroovyShell load(String groovyPath, BMotion session) throws BMotionException;
 
-    public String[] getImports();
+	// public String[] getImports();
 
 }

@@ -9,9 +9,8 @@ public class DefaultScriptEngineProvider implements IBMotionScriptEngineProvider
 		return new GroovyShell();
 	}
 
-	@Override
-	public String[] getImports() {
-		return new String[] {};
-	}
+	/*
+	 * @Override public String[] getImports() { return new String[] {}; }
+	 */
 
 }
