@@ -13,7 +13,6 @@ import com.corundumstudio.socketio.SocketIOClient;
 import de.bmotion.core.objects.FormulaListObject;
 import de.bmotion.core.objects.FormulaReturnObject;
 import groovy.lang.Closure;
-import groovy.lang.GroovyRuntimeException;
 
 public abstract class BMotion {
 
@@ -124,7 +123,7 @@ public abstract class BMotion {
 		}
 		try {
 			return func.call(args);
-		} catch (GroovyRuntimeException e) {
+		} catch (Exception e) {
 			throw new BMotionException(
 					"Some error occurred while executing method " + name + ": " + e.getMessage() + ".");
 		}
