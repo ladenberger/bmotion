@@ -64,20 +64,29 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 			public void onData(final SocketIOClient client, String sessionId, final AckRequest ackRequest) {
 				BMotion bms = server.getSessions().get(sessionId);
 				if (bms != null) {
-					// Add client only if not exists
-					if (!bms.getClients().contains(client)) {
-						bms.getClients().add(client);
-					}
-					Thread sessionThread = sessionThreads.get(sessionId.toString());
-					if (sessionThread != null) {
-						sessionThread.interrupt();
-						sessionThreads.remove(sessionId);
-					}
-					bms.sessionLoaded();
-					server.getClients().put(client, sessionId);
-					server.getSessions().put(sessionId, bms);
-					if (ackRequest.isAckRequested()) {
-						ackRequest.sendAckData(bms.getSessionData(), bms.getToolData());
+					try {
+						// Add client only if not exists
+						if (!bms.getClients().contains(client)) {
+							bms.getClients().add(client);
+						}
+						Thread sessionThread = sessionThreads.get(sessionId.toString());
+						if (sessionThread != null) {
+							sessionThread.interrupt();
+							sessionThreads.remove(sessionId);
+						}
+						Object groovyPath = bms.getSessionData().get("groovyPath");
+						if (groovyPath != null) {
+							bms.initGroovyScript(String.valueOf(groovyPath));
+						}
+						bms.sessionLoaded();
+						server.getClients().put(client, sessionId);
+						server.getSessions().put(sessionId, bms);
+						if (ackRequest.isAckRequested()) {
+							ackRequest.sendAckData(bms.getSessionData(), bms.getToolData());
+						}
+
+					} catch (BMotionException e) {
+						ackRequest.sendAckData(new ErrorObject(e.getMessage()));
 					}
 				} else {
 					ackRequest.sendAckData(new ErrorObject("Session with id " + sessionId + " does not exists!"));
