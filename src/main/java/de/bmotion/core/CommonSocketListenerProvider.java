@@ -1,5 +1,6 @@
 package de.bmotion.core;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,11 +40,20 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 
 						try {
 
+							File manifestFile = new File(initSesionObject.getManifestFilePath());
+							String templateFolder = manifestFile.getParent();
+							String modelPath = templateFolder + File.separator + initSesionObject.getModelPath();
+							String groovyPath = null;
+
+							if (initSesionObject.getGroovyPath() != null) {
+								groovyPath = templateFolder + File.separator + initSesionObject.getGroovyPath();
+							}
+
 							// Initialize new session
 							BMotion bms = InitSessionService.initSession(server, initSesionObject.getSessionId(),
-									initSesionObject.getModelPath(), initSesionObject.getGroovyPath(),
-									initSesionObject.getOptions());
+									modelPath, groovyPath, initSesionObject.getOptions());
 							bms.getSessionData().put("manifestFilePath", initSesionObject.getManifestFilePath());
+							bms.getSessionData().put("templateFolder", templateFolder);
 							bms.getClients().add(client);
 							server.getClients().put(client, bms.getId());
 
