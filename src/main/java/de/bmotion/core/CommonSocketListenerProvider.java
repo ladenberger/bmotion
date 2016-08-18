@@ -27,7 +27,6 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 
 	public final long waitTime = 10000;
 	public final long sessionWaitTime = 10000;
-	private Thread exitThread;
 
 	@Override
 	public void installListeners(BMotionSocketServer server) {
@@ -122,17 +121,22 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 					public void onData(final SocketIOClient client, ExecuteEventObject event,
 							final AckRequest ackRequest) {
 
+						Object returnObject;
 						BMotion bms = server.getSessions().get(event.getSessionId());
 						if (bms != null) {
 							try {
-								Object returnObject = bms.executeEvent(event.getOptions());
-								ackRequest.sendAckData(returnObject);
+								returnObject = bms.executeEvent(event.getOptions());
+
 							} catch (BMotionException e) {
-								ackRequest.sendAckData(new ErrorObject(e.getMessage()));
+								returnObject = new ErrorObject(e.getMessage());
 							}
 						} else {
-							ackRequest.sendAckData(
-									new ErrorObject("Session with id " + event.getSessionId() + " does not exists!"));
+							returnObject = new ErrorObject(
+									"Session with id " + event.getSessionId() + " does not exists!");
+						}
+
+						if (ackRequest.isAckRequested()) {
+							ackRequest.sendAckData(returnObject);
 						}
 
 					}
@@ -144,12 +148,19 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 
 				BMotion bms = server.getSessions().get(method.getSessionId());
 				if (bms != null) {
+
+					Object returnObject;
+
 					try {
-						Object returnObject = bms.callMethod(method.getName(), method.getArguments());
-						ackRequest.sendAckData(returnObject);
+						returnObject = bms.callMethod(method.getName(), method.getArguments());
 					} catch (BMotionException e) {
-						ackRequest.sendAckData(new ErrorObject(e.getMessage()));
+						returnObject = new ErrorObject(e.getMessage());
 					}
+				
+					if (ackRequest.isAckRequested()) {
+						ackRequest.sendAckData(returnObject);
+					}
+
 				} else {
 					ackRequest.sendAckData(
 							new ErrorObject("Session with id " + method.getSessionId() + " does not exists!"));
@@ -183,8 +194,6 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 			@Override
 			public void onConnect(SocketIOClient client) {
 				log.info("Client connected");
-				if (exitThread != null)
-					exitThread.interrupt();
 			}
 		});
 
@@ -195,46 +204,18 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 				String id = server.getClients().get(client);
 				BMotion bms = server.getSessions().get(id);
 				if (bms != null) {
-
+					log.info("Client disconnected");
 					server.getClients().remove(client);
 					bms.getClients().remove(client);
-
 					if (bms.getClients().isEmpty()) {
 						startSessionTimer(server, bms);
 					}
 				}
-				// In standalone mode exit server when no client exists
-				/*
-				 * if (server.getServer().getMode() ==
-				 * BMotionServer.MODE_STANDALONE) { boolean isEmptyClient =
-				 * server.getSocket().getAllClients().isEmpty(); log.info(
-				 * "Check if no clients exist " + isEmptyClient); if
-				 * (server.getSocket().getAllClients().isEmpty()) {
-				 * startTimer(server); } }
-				 */
 
 			}
 		});
 
 	}
-
-	/*
-	 * private void startTimer(BMotionSocketServer server) {
-	 * 
-	 * log.info("Going to start timer thread");
-	 * 
-	 * exitThread = new Thread(new Runnable() {
-	 * 
-	 * @Override public void run() { log.info("Timer thread started"); try {
-	 * Thread.sleep(waitTime); log.info("Check if still no clients exist"); if
-	 * (server.getSocket().getAllClients().isEmpty()) { log.info(
-	 * "Close BMotionWeb server process"); System.exit(-1); } } catch
-	 * (InterruptedException e) { log.info("Timer thread interrupted " +
-	 * e.getMessage()); } finally { log.info("Exit timer thread"); } } });
-	 * exitThread.start();
-	 * 
-	 * }
-	 */
 
 	private void startSessionTimer(BMotionSocketServer server, BMotion bms) {
 
