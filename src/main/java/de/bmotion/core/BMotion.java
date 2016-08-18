@@ -48,6 +48,10 @@ public abstract class BMotion {
 	public void checkObserver(String trigger) {
 		clients.forEach(client -> client.sendEvent("checkObserver", trigger, toolData));
 	}
+	
+	public void log(Object message) {
+		clients.forEach(client -> client.sendEvent("log", message));
+	}
 
 	public Object executeEvent(String name) throws BMotionException {
 		HashMap<String, String> options = new HashMap<String, String>();
