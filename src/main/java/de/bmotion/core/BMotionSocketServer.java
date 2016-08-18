@@ -39,6 +39,7 @@ public class BMotionSocketServer {
 		config.setPort(port);
 		config.setSocketConfig(socketConfig);
 		config.setMaxFramePayloadLength(64 * 1024 * 100);
+		config.setPingTimeout(900000); // 15 min
 		socket = new SocketIOServer(config);
 		server.getSocketListenerProvider().add(new CommonSocketListenerProvider());
 		server.getSocketListenerProvider().forEach(listener -> listener.installListeners(this));
