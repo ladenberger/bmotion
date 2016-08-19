@@ -14,7 +14,7 @@ import de.bmotion.core.objects.FormulaListObject;
 import de.bmotion.core.objects.FormulaReturnObject;
 import groovy.lang.Closure;
 
-public abstract class BMotion {
+public abstract class BMotion implements IBMotionApi {
 
 	public final static String TRIGGER_ANIMATION_CHANGED = "AnimationChanged";
 
@@ -48,7 +48,7 @@ public abstract class BMotion {
 	public void checkObserver(String trigger) {
 		clients.forEach(client -> client.sendEvent("checkObserver", trigger, toolData));
 	}
-	
+
 	public void log(Object message) {
 		clients.forEach(client -> client.sendEvent("log", message));
 	}
