@@ -57,9 +57,7 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 							server.getClients().put(client, bms.getId());
 
 							// Send session data to client
-							if (ackRequest.isAckRequested()) {
-								ackRequest.sendAckData(bms.getSessionData(), bms.getToolData());
-							}
+							ackRequest.sendAckData(bms.getSessionData(), bms.getToolData());
 
 						} catch (BMotionException e) {
 							ackRequest.sendAckData(new ErrorObject(e.getMessage()));
@@ -90,10 +88,7 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 						bms.sessionLoaded();
 						server.getClients().put(client, sessionId);
 						server.getSessions().put(sessionId, bms);
-						if (ackRequest.isAckRequested()) {
-							ackRequest.sendAckData(bms.getSessionData(), bms.getToolData());
-						}
-
+						ackRequest.sendAckData(bms.getSessionData(), bms.getToolData());
 					} catch (BMotionException e) {
 						ackRequest.sendAckData(new ErrorObject(e.getMessage()));
 					}
@@ -121,22 +116,17 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 					public void onData(final SocketIOClient client, ExecuteEventObject event,
 							final AckRequest ackRequest) {
 
-						Object returnObject;
 						BMotion bms = server.getSessions().get(event.getSessionId());
 						if (bms != null) {
 							try {
-								returnObject = bms.executeEvent(event.getOptions());
+								ackRequest.sendAckData(bms.executeEvent(event.getOptions()));
 
 							} catch (BMotionException e) {
-								returnObject = new ErrorObject(e.getMessage());
+								ackRequest.sendAckData(new ErrorObject(e.getMessage()));
 							}
 						} else {
-							returnObject = new ErrorObject(
-									"Session with id " + event.getSessionId() + " does not exists!");
-						}
-
-						if (ackRequest.isAckRequested()) {
-							ackRequest.sendAckData(returnObject);
+							ackRequest.sendAckData(
+									new ErrorObject("Session with id " + event.getSessionId() + " does not exists!"));
 						}
 
 					}
@@ -148,19 +138,11 @@ public class CommonSocketListenerProvider implements IBMotionSocketListenerProvi
 
 				BMotion bms = server.getSessions().get(method.getSessionId());
 				if (bms != null) {
-
-					Object returnObject;
-
 					try {
-						returnObject = bms.callMethod(method.getName(), method.getArguments());
+						ackRequest.sendAckData(bms.callMethod(method.getName(), method.getArguments()));
 					} catch (BMotionException e) {
-						returnObject = new ErrorObject(e.getMessage());
+						ackRequest.sendAckData(new ErrorObject(e.getMessage()));
 					}
-				
-					if (ackRequest.isAckRequested()) {
-						ackRequest.sendAckData(returnObject);
-					}
-
 				} else {
 					ackRequest.sendAckData(
 							new ErrorObject("Session with id " + method.getSessionId() + " does not exists!"));
