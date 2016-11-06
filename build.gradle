@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
 
-project.version = '0.3.1-SNAPSHOT'
+project.version = '0.3.1'
 project.group = 'de.hhu.stups'
 project.archivesBaseName = "bmotion"
 
@@ -41,9 +41,9 @@ dependencies {
     compile(group: 'org.eclipse.jetty', name: 'jetty-io', version: jetty_version)
     compile(group: 'org.eclipse.jetty', name: 'jetty-server', version: jetty_version)
     compile(group: 'org.eclipse.jetty', name: 'jetty-util', version: jetty_version)
-    
+
     testCompile(group: 'junit', name: 'junit', version: '4.12')
-    
+
 }
 
 sourceSets {
